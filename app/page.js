@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { ToolIcon } from '../components/Icon';
+import ToolCard from '../components/ToolCard';
 import { TOOLS } from '../components/tools';
 import { getConfig } from '../lib/config';
 
@@ -39,26 +38,8 @@ export default async function Home() {
       </section>
 
       <section id="herramientas" className="relative mx-auto max-w-6xl scroll-mt-20 px-5 pb-20">
-        <div className={'grid gap-4 sm:grid-cols-2 ' + (tools.length >= 4 ? 'lg:grid-cols-4' : tools.length === 3 ? 'lg:grid-cols-3' : '')}>
-          {tools.map((t, i) => (
-            <Link key={t.id} href={t.href} style={{ animationDelay: 0.3 + i * 0.07 + 's' }}
-              className="animate-rise group relative flex flex-col items-center rounded-3xl border border-white/10 bg-white/[.03] p-6 text-center transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[.06]">
-              <div className={'pointer-events-none absolute inset-x-8 -top-px h-px bg-gradient-to-r opacity-0 transition group-hover:opacity-100 ' + t.color} />
-              {t.image
-                ? <img src={t.image} alt="" className="h-16 w-16 rounded-2xl object-cover shadow-xl transition duration-300 group-hover:-rotate-3 group-hover:scale-110" />
-                : <ToolIcon id={t.id} className="h-16 w-16 transition duration-300 group-hover:-rotate-3 group-hover:scale-110" />}
-              {t.pair && (
-                <span className="cv-swap mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/30 px-2 py-1 text-[11px] font-semibold text-white/75">
-                  <span className="l inline-block w-14 text-center">{t.pair[0]}</span>
-                  <svg viewBox="0 0 24 24" className="a h-4 w-4 text-white/60" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9" /><path d="M5 2.5v4h4" /><path d="M4 13a8 8 0 0 0 14.3 4.9" /><path d="M19 21.5v-4h-4" /></svg>
-                  <span className="r inline-block w-14 text-center">{t.pair[1]}</span>
-                </span>
-              )}
-              <h2 className={'font-display text-lg font-bold ' + (t.pair ? 'mt-3' : 'mt-5')}>{t.title}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-white/55">{t.desc}</p>
-              <span className="mt-5 text-sm font-semibold text-white/80 transition group-hover:text-white">Abrir →</span>
-            </Link>
-          ))}
+        <div className={'grid gap-4 sm:grid-cols-2 ' + (tools.length >= 5 ? 'lg:grid-cols-3' : tools.length === 4 ? 'lg:grid-cols-4' : tools.length === 3 ? 'lg:grid-cols-3' : '')}>
+          {tools.map((t, i) => <ToolCard key={t.id} t={t} i={i} />)}
         </div>
       </section>
 

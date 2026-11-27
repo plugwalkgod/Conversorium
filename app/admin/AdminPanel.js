@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ToolIcon } from '../../components/Icon';
 
-const TOOL_IDS = ['epub', 'webp', 'webm', 'sticker'];
+const TOOL_IDS = ['epub', 'webp', 'webm', 'bg', 'sticker'];
 const input = 'mt-1.5 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition focus:border-violet-400';
 const label = 'block text-xs font-semibold uppercase tracking-wider text-violet-300';
 
@@ -155,6 +155,7 @@ export default function AdminPanel() {
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <Field name="Nombre" value={t.title} onChange={v => setTool(id, 'title', v)} />
                   <Field name="Descripción" value={t.desc} onChange={v => setTool(id, 'desc', v)} />
+                  {'descRev' in t && <div className="sm:col-span-2"><Field name="Descripción al girar la rueda" value={t.descRev} onChange={v => setTool(id, 'descRev', v)} /></div>}
                 </div>
               </div>
             );

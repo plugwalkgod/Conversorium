@@ -1,6 +1,7 @@
 export const TOOLS = [
-  { id: 'epub', href: '/epub-a-pdf', color: 'from-amber-300 to-orange-500', pair: ['EPUB', 'PDF'] },
-  { id: 'webp', href: '/webp', color: 'from-fuchsia-300 to-violet-600', pair: ['WebP', 'Imagen'] },
-  { id: 'webm', href: '/audio-video', color: 'from-cyan-300 to-blue-600', pair: ['Vídeo', 'Audio'] },
+  { id: 'epub', href: '/epub-a-pdf', color: 'from-amber-300 to-orange-500', pair: ['EPUB', 'PDF'], modes: ['epub2pdf', 'pdf2epub'] },
+  { id: 'webp', href: '/webp', color: 'from-fuchsia-300 to-violet-600', pair: ['WebP', 'PNG, JPG'], modes: ['fromwebp', 'towebp'] },
+  { id: 'webm', href: '/audio-video', color: 'from-cyan-300 to-blue-600' },
+  { id: 'bg', href: '/quitar-fondo', color: 'from-sky-300 to-indigo-500' },
   { id: 'sticker', href: '/stickers', color: 'from-green-300 to-green-600' },
 ];

@@ -7,16 +7,6 @@ body { background: #0b0a12; color: #fff; }
 .glow { background: radial-gradient(60% 50% at 50% 0%, rgba(139,123,255,.22), transparent 70%), radial-gradient(40% 40% at 85% 20%, rgba(255,107,154,.14), transparent 70%); }
 .grid-bg { background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(ellipse at top, #000 30%, transparent 75%); }
 
-/* Animación de intercambio en las tarjetas de la portada */
-@keyframes cv-spin { 0%, 40% { transform: rotate(0); } 50%, 90% { transform: rotate(180deg); } 100% { transform: rotate(360deg); } }
-@keyframes cv-l { 0%, 40% { transform: translateX(0); } 50%, 90% { transform: translateX(var(--d)); } 100% { transform: translateX(0); } }
-@keyframes cv-r { 0%, 40% { transform: translateX(0); } 50%, 90% { transform: translateX(calc(var(--d) * -1)); } 100% { transform: translateX(0); } }
-.cv-swap { --d: 5.25rem; }
-.cv-swap .l { animation: cv-l 4s cubic-bezier(.6,0,.3,1) infinite; }
-.cv-swap .r { animation: cv-r 4s cubic-bezier(.6,0,.3,1) infinite; }
-.cv-swap .a { animation: cv-spin 4s cubic-bezier(.6,0,.3,1) infinite; }
-@media (prefers-reduced-motion: reduce) { .cv-swap .l, .cv-swap .r, .cv-swap .a { animation: none; } }
-
 /* Estilos del editor de audio y avisos */
 .cv-toast { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 60; padding: .7rem 1.1rem; border-radius: .9rem; background: rgba(0,0,0,.85); border: 1px solid rgba(255,255,255,.15); color: #fff; font-size: .85rem; backdrop-filter: blur(8px); }
 .t-a { color: var(--a, #22d3ee); }
@@ -31,3 +21,8 @@ body { background: #0b0a12; color: #fff; }
 .btn:disabled, .btn-ghost:disabled { opacity: .4; pointer-events: none; }
 @keyframes cv-pop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
 .pop { animation: cv-pop .25s ease; }
+
+/* Deslizadores de Quitar fondo */
+.cv-range { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 9999px; background: linear-gradient(90deg, #7dd3fc, #6366f1) 0 0 / var(--p) 100% no-repeat, rgba(255,255,255,.12); cursor: pointer; }
+.cv-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 9999px; background: #fff; border: 3px solid #6366f1; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.cv-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 9999px; background: #fff; border: 3px solid #6366f1; }

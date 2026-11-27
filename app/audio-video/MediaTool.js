@@ -9,7 +9,7 @@ const isAudio = f => /^audio\//.test(f.type) || /\.(mp3|wav|m4a|ogg|flac|aac)$/i
 
 const MODES = [
   {
-    key: 'extract', from: 'Vídeo · Audio', to: 'MP3 · WAV · MP4', title: 'Extraer, editar y convertir',
+    key: 'extract', from: 'Vídeo · Audio', to: 'MP3 · WAV · MP4', title: 'Audio y vídeo',
     subtitle: 'Saca el audio en MP3 o WAV, recórtalo con el editor o convierte el vídeo a MP4.',
     drop: 'Suelta tus vídeos o audios', accept: MEDIA, test: isMedia,
     defaults: { target: 'mp3', kbps: 192, engine: 'wasm', fadeIn: false, fadeOut: false, merge: false },
@@ -30,14 +30,6 @@ const MODES = [
         ✂ Editar y recortar
       </button>
     ),
-  },
-  {
-    key: 'tovideo', from: 'Audio', to: 'Vídeo MP4', title: 'Audio a vídeo',
-    subtitle: 'Convierte un MP3 o WAV en un vídeo MP4 con portada, listo para subir a redes.',
-    drop: 'Suelta tus audios', accept: '.mp3,.wav,.m4a,.ogg,.flac,.aac,audio/*', test: isAudio,
-    defaults: { cover: null },
-    fields: [{ key: 'cover', label: 'Imagen de portada', type: 'file', accept: 'image/*', ph: 'Opcional: se genera una', hint: 'Si no eliges ninguna, se crea una portada con el nombre del audio.' }],
-    run: async (file, o, p) => (await import('../../lib/engine')).audioToVideo(file, o, p),
   },
 ];
 

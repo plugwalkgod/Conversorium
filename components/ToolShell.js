@@ -1,5 +1,5 @@
 'use client';
-import { useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ToolIcon } from './Icon';
 
@@ -85,10 +85,23 @@ export default function ToolShell({ id, accent, modes, packAction }) {
   const input = useRef(null);
   const items = queues.current[mi];
 
+  useEffect(() => {
+    const m = new URLSearchParams(window.location.search).get('modo');
+    const k = modes.findIndex(x => x.key === m);
+    if (k > 0) { setMi(k); setSpin(k); }
+  }, [modes]);
+
   function swap() {
     if (busy || modes.length < 2) return;
     setSpin(s => s + 1); setFade(true);
-    setTimeout(() => { setMi(i => (i + 1) % modes.length); setFade(false); }, 180);
+    setTimeout(() => {
+      setMi(i => {
+        const n = (i + 1) % modes.length;
+        const u = new URL(window.location.href); u.searchParams.set('modo', modes[n].key); window.history.replaceState(null, '', u);
+        return n;
+      });
+      setFade(false);
+    }, 180);
   }
   function add(files) {
     const all = Array.from(files || []);
@@ -146,24 +159,24 @@ export default function ToolShell({ id, accent, modes, packAction }) {
 
       <div className="mt-6 flex items-center gap-4">
         <ToolIcon id={id} className="h-14 w-14" />
-        <div className={'min-w-0 transition-all duration-200 ' + (fade ? 'translate-y-1 opacity-0' : 'opacity-100')}>
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">{mode.title}</h1>
-          <p className="mt-1 text-sm text-white/55">{mode.subtitle}</p>
+        <div className="min-w-0">
+          {modes.length > 1 ? (
+            <h1 className="font-display flex flex-wrap items-center gap-2.5 text-2xl font-bold tracking-tight sm:text-3xl">
+              <span className={'transition-all duration-200 ' + (fade ? 'translate-y-1 opacity-0' : 'opacity-100')}>{mode.from}</span>
+              <button type="button" onClick={swap} disabled={busy} title="Cambiar el sentido de la conversión"
+                className={'grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br text-black shadow-lg transition hover:scale-110 active:scale-95 disabled:opacity-50 ' + accent.grad}>
+                <SwapArrows spin={spin} className="h-[18px] w-[18px]" />
+              </button>
+              <span className={'transition-all duration-200 ' + (fade ? 'translate-y-1 opacity-0' : 'opacity-100')}>{mode.to}</span>
+            </h1>
+          ) : (
+            <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">{mode.title}</h1>
+          )}
+          <p className={'mt-1 text-sm text-white/55 transition-opacity duration-200 ' + (fade ? 'opacity-0' : 'opacity-100')}>{mode.subtitle}</p>
         </div>
       </div>
 
-      {modes.length > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-2.5">
-          <span className={'min-w-0 flex-1 truncate rounded-xl bg-black/30 px-3 py-2 text-center text-sm font-semibold transition-all duration-200 ' + (fade ? 'opacity-0' : 'opacity-100')}>{mode.from}</span>
-          <button type="button" onClick={swap} disabled={busy} title="Cambiar el sentido de la conversión"
-            className={'grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br text-black shadow-lg transition hover:scale-110 active:scale-95 disabled:opacity-50 ' + accent.grad}>
-            <SwapArrows spin={spin} className="h-5 w-5" />
-          </button>
-          <span className={'min-w-0 flex-1 truncate rounded-xl bg-black/30 px-3 py-2 text-center text-sm font-semibold transition-all duration-200 ' + (fade ? 'opacity-0' : 'opacity-100')}>{mode.to}</span>
-        </div>
-      )}
-
-      <div className={'mt-5 rounded-3xl border border-white/10 bg-white/[.03] p-5 transition-opacity duration-200 sm:p-6 ' + (fade ? 'opacity-40' : 'opacity-100')}>
+      <div className={'mt-6 rounded-3xl border border-white/10 bg-white/[.03] p-5 transition-opacity duration-200 sm:p-6 ' + (fade ? 'opacity-40' : 'opacity-100')}>
         {mode.fields.length > 0 && <Fields fields={mode.fields} opts={opts} setOpt={setOpt} accent={accent} />}
 
         <div role="button" tabIndex={0}
