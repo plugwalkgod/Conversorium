@@ -907,11 +907,13 @@ async function runSticker(file, o, p){
 }
 
 // ---------- Servidor local (yt-dlp + ffmpeg) ----------
+const LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 const API = (location.protocol.indexOf('http') === 0 && location.port === '8765') ? '' : 'http://localhost:8765';
 let srv = null;
 const netMsg = e => (e instanceof TypeError) ? 'No se pudo contactar con el servidor local. ¿Está ejecutándose servidor.py?' : ((e && e.message) || 'Error desconocido');
 
 async function checkServer(){
+  if (!LOCAL) return (srv = null);
   try {
     const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 1500);
     const r = await fetch(API + '/api/status', { signal: ctl.signal });
@@ -1115,7 +1117,7 @@ const TOOLS = {
     fields:[
       { key:'target', label:'Convertir a', type:'select', options:[['mp3','Audio MP3'],['wav','Audio WAV'],['video','Vídeo (MP4 o WebM)']] },
       { key:'kbps', label:'Calidad MP3', type:'select', num:true, when:o => o.target === 'mp3', options:[[128,'128 kbps'],[192,'192 kbps'],[320,'320 kbps']] },
-      { key:'useServer', label:'Usar ffmpeg del servidor local (rápido, sin grabar en tiempo real)', type:'check', when:o => o.target === 'video' },
+      { key:'useServer', label:'Usar ffmpeg del servidor local (rápido, sin grabar en tiempo real)', type:'check', when:o => LOCAL && o.target === 'video' },
       { key:'fadeIn', label:'Fundido de entrada', type:'check', when:o => o.target !== 'video' },
       { key:'fadeOut', label:'Fundido de salida', type:'check', when:o => o.target !== 'video' },
       { key:'merge', label:'Unir todos en un solo audio', type:'check', when:o => o.target !== 'video' },
@@ -1159,7 +1161,7 @@ function dl(blob, name){
 }
 
 function renderTabs(){
-  $('#tabs').innerHTML = Object.entries(TOOLS).map(([id, t]) =>
+  $('#tabs').innerHTML = Object.entries(TOOLS).filter(([id]) => LOCAL || id !== 'url').map(([id, t]) =>
     '<button class="tab' + (ui.tab === id ? ' on' : '') + '" data-tab="' + id + '"><span class="mr-1">' + t.icon + '</span>' + t.label + '</button>').join('');
   $('#hicon').textContent = TOOLS[ui.tab].icon;
 }
