@@ -1486,7 +1486,7 @@ async function makeZip(asPack){
 }
 
 $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
-setTab('epub');
+{ const h = location.hash.slice(1); setTab(TOOLS[h] && (LOCAL || h !== 'url') ? h : 'epub'); }
 if (LOCAL) checkServer();
 })();
 </script>

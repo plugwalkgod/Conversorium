@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { color-scheme: dark; }
+body { background: #0b0a12; color: #fff; }
+.glow { background: radial-gradient(60% 50% at 50% 0%, rgba(139,123,255,.22), transparent 70%), radial-gradient(40% 40% at 85% 20%, rgba(255,107,154,.14), transparent 70%); }
+.grid-bg { background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(ellipse at top, #000 30%, transparent 75%); }
