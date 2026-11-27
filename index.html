@@ -108,7 +108,7 @@ input[type=checkbox]{ accent-color:var(--a); width:1rem; height:1rem; }
 
   <section id="panel" class="mt-5 rounded-3xl border border-white/10 bg-black/35 p-5 shadow-2xl backdrop-blur-xl sm:p-7"></section>
 
-  <footer class="mt-8 text-center text-xs text-white/35">Hecho con Tailwind · JSZip · jsPDF · lamejs · yt-dlp · ffmpeg</footer>
+  <footer class="mt-8 text-center text-xs text-white/35">Hecho con Tailwind · JSZip · jsPDF · lamejs · ffmpeg.wasm · yt-dlp · ffmpeg</footer>
 </main>
 
 <script>
@@ -686,7 +686,17 @@ async function encodeAudio(buf, o, p){
 
 async function runWebm(file, o, p, it){
   const base = file.name.replace(/\.[^.]+$/, '') || 'archivo';
-  if (o.target === 'video') return o.useServer ? serverConvert(file, 'mp4', p) : mediaToVideo(file, base, p);
+  if (o.target === 'video'){
+    if (o.engine === 'server' && LOCAL) return serverConvert(file, 'mp4', p);
+    if (o.engine === 'wasm'){
+      if (file.size > 1.5e9) toast('Archivo muy grande para ffmpeg en el navegador: se grabará en tiempo real.');
+      else {
+        try { return await wasmToMp4(file, base, p); }
+        catch (e){ console.error(e); toast('ffmpeg no pudo con este archivo: se grabará en tiempo real.'); }
+      }
+    }
+    return mediaToVideo(file, base, p);
+  }
   p(8, 'Extrayendo audio…');
   let buf = (it && it.audioBuf) || await decodeAudio(file);
   const edited = !!(it && it.cuts && it.cuts.length);
@@ -948,6 +958,59 @@ async function serverConvert(file, target, p){
   return { blob: await rb.blob(), name: fin.name };
 }
 
+// ---------- ffmpeg en el navegador (ffmpeg.wasm) ----------
+const FF_CDN = 'https://cdn.jsdelivr.net/npm/';
+let ffPromise = null, ffProg = null;
+async function cdnBlobURL(path, type, p, from, to){
+  const r = await fetch(FF_CDN + path);
+  if (!r.ok) throw new Error('No se pudo descargar ' + path);
+  const total = +r.headers.get('content-length') || 0;
+  if (!p || !total || !r.body) return URL.createObjectURL(new Blob([await r.arrayBuffer()], { type }));
+  const rd = r.body.getReader(), parts = []; let got = 0;
+  for (;;){
+    const { done, value } = await rd.read(); if (done) break;
+    parts.push(value); got += value.length;
+    p(from + Math.round((to - from) * got / total), 'Descargando ffmpeg (solo la primera vez)… ' + Math.round(got / 1048576) + ' / ' + Math.round(total / 1048576) + ' MB');
+  }
+  return URL.createObjectURL(new Blob(parts, { type }));
+}
+function loadFFmpeg(p){
+  if (!ffPromise){
+    ffPromise = (async () => {
+      p(2, 'Cargando ffmpeg…');
+      const { FFmpeg } = await import(FF_CDN + '@ffmpeg/ffmpeg@0.12.15/dist/esm/index.js');
+      const ff = new FFmpeg();
+      ff.on('progress', e => { if (ffProg) ffProg(e.progress); });
+      const worker = URL.createObjectURL(new Blob(["import '" + FF_CDN + "@ffmpeg/ffmpeg@0.12.15/dist/esm/worker.js';"], { type:'text/javascript' }));
+      const core = await cdnBlobURL('@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js', 'text/javascript');
+      const wasm = await cdnBlobURL('@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm', 'application/wasm', p, 3, 30);
+      p(31, 'Iniciando ffmpeg…');
+      await ff.load({ classWorkerURL: worker, coreURL: core, wasmURL: wasm });
+      return ff;
+    })();
+    ffPromise.catch(() => { ffPromise = null; });
+  }
+  return ffPromise;
+}
+async function wasmToMp4(file, base, p){
+  const ff = await loadFFmpeg(p);
+  const ext = (file.name.match(/\.[^.]+$/) || ['.webm'])[0].toLowerCase();
+  const inp = 'in' + ext, out = 'out.mp4';
+  p(33, 'Preparando archivo…');
+  await ff.writeFile(inp, new Uint8Array(await file.arrayBuffer()));
+  ffProg = f => p(35 + Math.max(0, Math.min(63, Math.round(f * 63))), 'Convirtiendo con ffmpeg… ' + Math.max(0, Math.min(100, Math.round(f * 100))) + '%');
+  try {
+    const code = await ff.exec(['-i', inp, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', out]);
+    if (code !== 0) throw new Error('ffmpeg terminó con código ' + code);
+    const data = await ff.readFile(out);
+    return { blob: new Blob([data], { type:'video/mp4' }), name: base + '.mp4' };
+  } finally {
+    ffProg = null;
+    try { await ff.deleteFile(inp); } catch (e){}
+    try { await ff.deleteFile(out); } catch (e){}
+  }
+}
+
 // ---------- Pestaña: Descargar URL ----------
 const U = { url:'', info:null, infoErr:null, mode:'video', quality:'best', vfmt:'mp4', afmt:'mp3', job:null, busy:false, hist:[] };
 const fmtDur = s => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); };
@@ -1110,14 +1173,14 @@ const TOOLS = {
   },
   webm: {
     icon:'🎬', label:'WebM / vídeo',
-    desc:'Extrae el audio (MP3 o WAV), con editor para recortar, quitar partes y unir el resto, o regraba el vídeo como MP4/WebM.',
+    desc:'Extrae el audio (MP3 o WAV), con editor para recortar, quitar partes y unir el resto, o convierte el vídeo a MP4 con ffmpeg, sin salir del navegador.',
     drop:'Suelta tus vídeos o audios', accept:'.webm,.mp4,.mov,.ogv,.ogg,.m4a,.mp3,.wav,video/*,audio/*',
     test: f => /^(video|audio)\//.test(f.type) || /\.(webm|mp4|mov|ogv|ogg|m4a|mp3|wav|mkv)$/i.test(f.name),
-    opts:{ target:'mp3', kbps:192, fadeIn:false, fadeOut:false, merge:false, useServer:false },
+    opts:{ target:'mp3', kbps:192, fadeIn:false, fadeOut:false, merge:false, engine:'wasm' },
     fields:[
       { key:'target', label:'Convertir a', type:'select', options:[['mp3','Audio MP3'],['wav','Audio WAV'],['video','Vídeo (MP4 o WebM)']] },
       { key:'kbps', label:'Calidad MP3', type:'select', num:true, when:o => o.target === 'mp3', options:[[128,'128 kbps'],[192,'192 kbps'],[320,'320 kbps']] },
-      { key:'useServer', label:'Usar ffmpeg del servidor local (rápido, sin grabar en tiempo real)', type:'check', when:o => LOCAL && o.target === 'video' },
+      { key:'engine', label:'Método de vídeo', type:'select', when:o => o.target === 'video', options:[['wasm','MP4 rápido con ffmpeg (recomendado)'],['record','Grabar en tiempo real (MP4 o WebM)']].concat(LOCAL ? [['server','ffmpeg del servidor local']] : []) },
       { key:'fadeIn', label:'Fundido de entrada', type:'check', when:o => o.target !== 'video' },
       { key:'fadeOut', label:'Fundido de salida', type:'check', when:o => o.target !== 'video' },
       { key:'merge', label:'Unir todos en un solo audio', type:'check', when:o => o.target !== 'video' },
