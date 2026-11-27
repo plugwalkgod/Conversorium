@@ -47,7 +47,14 @@ export default async function Home() {
               {t.image
                 ? <img src={t.image} alt="" className="h-16 w-16 rounded-2xl object-cover shadow-xl transition duration-300 group-hover:-rotate-3 group-hover:scale-110" />
                 : <ToolIcon id={t.id} className="h-16 w-16 transition duration-300 group-hover:-rotate-3 group-hover:scale-110" />}
-              <h2 className="font-display mt-5 text-lg font-bold">{t.title}</h2>
+              {t.pair && (
+                <span className="cv-swap mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/30 px-2 py-1 text-[11px] font-semibold text-white/75">
+                  <span className="l inline-block w-14 text-center">{t.pair[0]}</span>
+                  <svg viewBox="0 0 24 24" className="a h-4 w-4 text-white/60" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9" /><path d="M5 2.5v4h4" /><path d="M4 13a8 8 0 0 0 14.3 4.9" /><path d="M19 21.5v-4h-4" /></svg>
+                  <span className="r inline-block w-14 text-center">{t.pair[1]}</span>
+                </span>
+              )}
+              <h2 className={'font-display text-lg font-bold ' + (t.pair ? 'mt-3' : 'mt-5')}>{t.title}</h2>
               <p className="mt-2 text-sm leading-relaxed text-white/55">{t.desc}</p>
               <span className="mt-5 text-sm font-semibold text-white/80 transition group-hover:text-white">Abrir →</span>
             </Link>
