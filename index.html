@@ -35,7 +35,13 @@ body[data-theme=url]    { --a:#fb7185; --a2:#f43f5e; --bg:#1a0509; }
 .brand{ color:#fff; }
 .brand-ium{ background-image:linear-gradient(90deg,#8b7bff,#ff6b9a); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .ico{ width:1em; height:1em; display:inline-block; }
-.dzi .ico{ width:2.5rem; height:2.5rem; color:var(--a); }
+.tile{ filter:drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
+.tab{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.45rem; text-align:center; }
+.tab .tab-ico{ font-size:2.1rem; line-height:0; transition:transform .25s; }
+.tab:hover .tab-ico, .tab.on .tab-ico{ transform:scale(1.08) rotate(-3deg); }
+.dzi .ico.tile{ width:3.6rem; height:3.6rem; }
+.hico{ font-size:1.9rem; line-height:0; }
+.thumbico{ font-size:3.5rem; line-height:0; }
 
 .grad-text{ background-image:linear-gradient(90deg,var(--a),var(--a2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .font-display{ font-family:'Space Grotesk','Inter',sans-serif; }
@@ -70,7 +76,7 @@ select.sel option{ background:#151515; color:#fff; }
 .lbl{ font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; color:var(--a); font-weight:700; margin-bottom:.3rem; }
 input[type=checkbox]{ accent-color:var(--a); width:1rem; height:1rem; }
 
-.tab{ border-radius:.9rem; padding:.7rem .6rem; font-weight:600; font-size:.82rem; border:1px solid rgba(255,255,255,.1);
+.tab{ border-radius:1rem; padding:.9rem .6rem .8rem; font-weight:600; font-size:.82rem; border:1px solid rgba(255,255,255,.1);
   background:rgba(255,255,255,.04); color:rgba(255,255,255,.7); cursor:pointer; transition:all .25s; }
 .tab:hover{ background:rgba(255,255,255,.1); color:#fff; transform:translateY(-2px); }
 .tab.on{ background-image:linear-gradient(90deg,var(--a),var(--a2)); color:#0b0b10; border-color:transparent; box-shadow:0 12px 34px -12px var(--a); }
@@ -104,15 +110,15 @@ input[type=checkbox]{ accent-color:var(--a); width:1rem; height:1rem; }
 </div>
 
 <main class="relative z-10 mx-auto w-full max-w-3xl px-4 py-10 sm:py-14">
-  <header class="flex items-center gap-4">
-    <svg viewBox="0 0 64 64" class="h-12 w-12 shrink-0 drop-shadow-xl" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7bff"/><stop offset="1" stop-color="#ff6b9a"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg)"/><g fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 27a14 14 0 0 1 24.5-6.5"/><path d="M44.5 13v8h-8"/><path d="M45 37a14 14 0 0 1-24.5 6.5"/><path d="M19.5 51v-8h8"/></g></svg>
+  <header class="flex items-center gap-3">
+    <svg viewBox="0 0 64 64" class="h-9 w-9 shrink-0 drop-shadow-xl" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7bff"/><stop offset="1" stop-color="#ff6b9a"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg)"/><g fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 27a14 14 0 0 1 24.5-6.5"/><path d="M44.5 13v8h-8"/><path d="M45 37a14 14 0 0 1-24.5 6.5"/><path d="M19.5 51v-8h8"/></g></svg>
     <div>
-      <h1 class="brand font-display text-3xl font-bold leading-none tracking-tight sm:text-[2.1rem]">Conversor<span class="brand-ium">ium</span></h1>
-      <p class="mt-1.5 text-sm text-white/55">Convierte libros, imágenes, audio y vídeo. Tus archivos no salen de tu dispositivo.</p>
+      <h1 class="brand font-display text-2xl font-bold leading-none tracking-tight">Conversor<span class="brand-ium">ium</span></h1>
+      <p class="mt-1 text-xs text-white/55 sm:text-sm">Convierte libros, imágenes, audio y vídeo. Tus archivos no salen de tu dispositivo.</p>
     </div>
   </header>
 
-  <nav id="tabs" class="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-3"></nav>
+  <nav id="tabs" class="mt-7 grid grid-cols-2 gap-2.5 sm:grid-cols-4"></nav>
 
   <section id="panel" class="mt-5 rounded-3xl border border-white/10 bg-black/35 p-5 shadow-2xl backdrop-blur-xl sm:p-7"></section>
 
@@ -766,8 +772,8 @@ async function openEditor(it){
     '<div class="pop max-h-[95vh] w-full max-w-3xl overflow-auto rounded-3xl border border-white/10 bg-[#0d0d12]/95 p-5 shadow-2xl sm:p-6">' +
       '<div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="font-display text-xl font-bold">✂ Editar audio</h3>' +
       '<p class="truncate text-xs text-white/50">' + esc(it.file.name) + '</p></div></div>' +
-      '<p class="mt-3 text-sm text-white/65">Arrastra sobre la onda para seleccionar un trozo. Lo que quites desaparece y <b class="t-a">el resto se une solo</b>.</p>' +
-      '<canvas id="edcv" class="mt-3 h-36 w-full cursor-crosshair rounded-xl border border-white/10 bg-black/40" style="touch-action:none"></canvas>' +
+      '<p class="mt-3 text-sm text-white/65">Arrastra sobre la onda para seleccionar. Mueve los <b class="t-a">tiradores</b> de los bordes para ajustar, o arrastra la selección para desplazarla. Haz clic en una zona eliminada (en rojo) para recuperarla. Lo que quites desaparece y <b class="t-a">el resto se une solo</b>.</p>' +
+      '<canvas id="edcv" class="mt-3 h-44 w-full cursor-crosshair rounded-xl border border-white/10 bg-black/40" style="touch-action:none"></canvas>' +
       '<div class="font-mono2 mt-2 flex flex-wrap justify-between gap-2 text-xs text-white/55"><span id="edinfo"></span><span id="edsel"></span></div>' +
       '<div class="mt-3 flex flex-wrap items-end gap-3">' +
         '<div><div class="lbl">Inicio (s)</div><input id="eds" type="number" min="0" step="0.1" class="sel w-28"></div>' +
@@ -790,21 +796,47 @@ async function openEditor(it){
 
   const keptDur = () => keptRanges(dur, cuts).reduce((a, [s, e]) => a + (e - s), 0);
 
+  let hover = null;
   function draw(){
     const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
     if (cv.width !== Math.round(W * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     const acc = getComputedStyle(document.body).getPropertyValue('--a').trim() || '#fff';
-    const bw = Math.max(1, W / peaks.length);
-    g.fillStyle = 'rgba(255,255,255,.75)';
-    peaks.forEach(([mn, mx], i) => { const y1 = H/2 - mx * H * 0.47, y2 = H/2 - mn * H * 0.47; g.fillRect(i / peaks.length * W, y1, bw, Math.max(1, y2 - y1)); });
-    g.fillStyle = 'rgba(244,63,94,.45)';
-    cuts.forEach(([s, e]) => g.fillRect(s / dur * W, 0, (e - s) / dur * W, H));
-    if (sel){
-      g.globalAlpha = .28; g.fillStyle = acc; g.fillRect(sel[0] / dur * W, 0, (sel[1] - sel[0]) / dur * W, H); g.globalAlpha = 1;
-      g.fillStyle = acc; g.fillRect(sel[0] / dur * W - 1, 0, 2, H); g.fillRect(sel[1] / dur * W - 1, 0, 2, H);
+    const RH = 18, WH = H - RH, mid = WH / 2;
+    const n = Math.max(40, Math.floor(W / 4)), bw = W / n;
+    const inCut = t => cuts.some(([s, e]) => t >= s && t < e);
+    for (let i = 0; i < n; i++){
+      const a0 = Math.floor(i / n * peaks.length), a1 = Math.max(a0 + 1, Math.floor((i + 1) / n * peaks.length));
+      let m = 0; for (let k = a0; k < a1 && k < peaks.length; k++) m = Math.max(m, -peaks[k][0], peaks[k][1]);
+      const h = Math.max(2, Math.min(1, m) * (WH - 10)), t = (i + .5) / n * dur;
+      const inSel = sel && t >= sel[0] && t <= sel[1];
+      g.fillStyle = inCut(t) ? 'rgba(244,63,94,.35)' : inSel ? acc : 'rgba(255,255,255,.72)';
+      const x = i * bw + bw * .18, w = Math.max(1, bw * .64), y = mid - h / 2;
+      if (g.roundRect){ g.beginPath(); g.roundRect(x, y, w, h, Math.min(w / 2, 2)); g.fill(); } else g.fillRect(x, y, w, h);
     }
-    if (pb && pb.pos != null){ g.fillStyle = '#fff'; g.fillRect(pb.pos / dur * W - 1, 0, 2, H); }
+    cuts.forEach(([s, e]) => {
+      const x0 = s / dur * W, x1 = e / dur * W;
+      g.fillStyle = 'rgba(244,63,94,.14)'; g.fillRect(x0, 0, x1 - x0, WH);
+      g.strokeStyle = 'rgba(244,63,94,.7)'; g.setLineDash([4, 4]); g.strokeRect(x0 + .5, .5, x1 - x0 - 1, WH - 1); g.setLineDash([]);
+      if (x1 - x0 > 46){ g.fillStyle = 'rgba(255,170,185,.9)'; g.font = '11px Inter,sans-serif'; g.textAlign = 'center'; g.fillText('eliminado', (x0 + x1) / 2, 13); }
+    });
+    if (sel){
+      const x0 = sel[0] / dur * W, x1 = sel[1] / dur * W;
+      g.globalAlpha = .16; g.fillStyle = acc; g.fillRect(x0, 0, x1 - x0, WH); g.globalAlpha = 1;
+      for (const [x, k] of [[x0, 0], [x1, 1]]){
+        g.fillStyle = acc; g.fillRect(x - 1.5, 0, 3, WH);
+        const hw = hover === k ? 12 : 10, hh = hover === k ? 30 : 26;
+        if (g.roundRect){ g.beginPath(); g.roundRect(x - hw / 2, mid - hh / 2, hw, hh, 4); g.fill(); } else g.fillRect(x - hw / 2, mid - hh / 2, hw, hh);
+        g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(x - 2, mid - 6, 1.2, 12); g.fillRect(x + .8, mid - 6, 1.2, 12);
+      }
+    }
+    // regla de tiempo
+    g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(0, WH, W, 1);
+    const steps = [0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1800];
+    const st = steps.find(v => v / dur * W >= 70) || 3600;
+    g.font = '10px "IBM Plex Mono",monospace'; g.fillStyle = 'rgba(255,255,255,.45)'; g.textAlign = 'left';
+    for (let t = 0; t <= dur; t += st){ const x = t / dur * W; g.fillRect(x, WH, 1, 4); if (x < W - 30) g.fillText(fmtT(t), x + 3, H - 4); }
+    if (pb && pb.pos != null){ g.fillStyle = '#fff'; g.fillRect(pb.pos / dur * W - 1, 0, 2, WH); }
   }
   function refresh(){
     wrap.querySelector('#edinfo').textContent = 'Original ' + fmtT(dur) + ' · Resultado ' + fmtT(keptDur()) + ' · ' + cuts.length + ' corte(s)';
@@ -818,14 +850,54 @@ async function openEditor(it){
     draw();
   }
   const tAt = e => { const r = cv.getBoundingClientRect(); return Math.max(0, Math.min(dur, (e.clientX - r.left) / r.width * dur)); };
-  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); drag = tAt(e); sel = null; refresh(); });
+  const pxT = px => px / cv.clientWidth * dur;
+  const edgeAt = e => {
+    if (!sel) return null;
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, x0 = sel[0] / dur * r.width, x1 = sel[1] / dur * r.width;
+    if (Math.abs(x - x0) <= 10) return 0; if (Math.abs(x - x1) <= 10) return 1;
+    return null;
+  };
+  cv.addEventListener('pointerdown', e => {
+    cv.setPointerCapture(e.pointerId);
+    const t = tAt(e), edge = edgeAt(e);
+    if (edge != null) drag = { kind:'edge', edge };
+    else if (sel && t > sel[0] && t < sel[1]) drag = { kind:'move', off: t - sel[0], len: sel[1] - sel[0], x: e.clientX, moved:false };
+    else {
+      const ci = cuts.findIndex(([s, e2]) => t >= s && t < e2);
+      drag = { kind:'new', t0: t, x: e.clientX, cut: ci, moved:false };
+    }
+  });
   cv.addEventListener('pointermove', e => {
-    if (drag == null) return;
-    const t = tAt(e); sel = [Math.min(drag, t), Math.max(drag, t)];
-    if (sel[1] - sel[0] < 0.05) sel = null;
+    if (!drag){
+      const ed = edgeAt(e), t = tAt(e);
+      hover = ed;
+      cv.style.cursor = ed != null ? 'ew-resize' : (sel && t > sel[0] && t < sel[1]) ? 'grab' : cuts.some(([s, e2]) => t >= s && t < e2) ? 'pointer' : 'crosshair';
+      draw(); return;
+    }
+    const t = tAt(e);
+    if (drag.kind === 'edge'){
+      const min = pxT(6);
+      if (drag.edge === 0) sel[0] = Math.max(0, Math.min(t, sel[1] - min)); else sel[1] = Math.min(dur, Math.max(t, sel[0] + min));
+    } else if (drag.kind === 'move'){
+      if (Math.abs(e.clientX - drag.x) > 3) drag.moved = true;
+      cv.style.cursor = 'grabbing';
+      const s0 = Math.max(0, Math.min(dur - drag.len, t - drag.off)); sel = [s0, s0 + drag.len];
+    } else {
+      if (Math.abs(e.clientX - drag.x) > 4) drag.moved = true;
+      if (!drag.moved) return;
+      sel = [Math.min(drag.t0, t), Math.max(drag.t0, t)];
+      if (sel[1] - sel[0] < 0.02) sel = null;
+    }
     refresh();
   });
-  cv.addEventListener('pointerup', () => { drag = null; });
+  cv.addEventListener('pointerup', () => {
+    if (drag && drag.kind === 'new' && !drag.moved){
+      if (drag.cut > -1){ push(); sel = cuts[drag.cut].slice(); cuts.splice(drag.cut, 1); toast('Zona recuperada: ajústala y vuelve a quitarla, o déjala así.'); }
+      else sel = null;
+    }
+    drag = null; refresh();
+  });
+  cv.addEventListener('pointerleave', () => { if (!drag && hover != null){ hover = null; draw(); } });
   const fromInputs = () => {
     let a = parseFloat(inS.value), b = parseFloat(inE.value);
     if (isNaN(a) || isNaN(b)) return;
@@ -1155,7 +1227,7 @@ const extOf = n => (n.split('.').pop() || '').toUpperCase();
 
 const TOOLS = {
   epub: {
-    icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h7M8 11h5"/></svg>', label:'EPUB → PDF',
+    icon:'<svg class="ico tile" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="ge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fcd34d"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#ge)"/><rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/><path d="M18 15h21l8 8v26H18z" fill="#fff"/><path d="M39 15v8h8" fill="#fde68a"/><rect x="23" y="29" width="18" height="3" rx="1.5" fill="#f59e0b"/><rect x="23" y="36" width="13" height="3" rx="1.5" fill="#fbbf24"/><rect x="31" y="41" width="20" height="11" rx="3" fill="#b91c1c"/><text x="41" y="49.5" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" font-weight="800" fill="#fff">PDF</text></svg>', label:'EPUB → PDF',
     desc:'Convierte libros electrónicos a PDF con portada, capítulos e imágenes.',
     drop:'Suelta tus libros .epub', accept:'.epub', test: f => /\.epub$/i.test(f.name),
     opts:{ pageSize:'a4', fontSize:11 },
@@ -1169,7 +1241,7 @@ const TOOLS = {
     },
   },
   webp: {
-    icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9 9"/></svg>', label:'WebP → imagen / vídeo',
+    icon:'<svg class="ico tile" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="gw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0abfc"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#gw)"/><rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/><rect x="14" y="17" width="36" height="30" rx="6" fill="#fff"/><circle cx="25" cy="27" r="4" fill="#fbbf24"/><path d="M14 41l11-10 8 7 6-5 11 9v1a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#a855f7"/><path d="M33 38l6-5 11 9v1a6 6 0 0 1-6 6h-8z" fill="#d946ef"/></svg>', label:'WebP → imagen / vídeo',
     desc:'Pasa WebP a PNG o JPG, o convierte un WebP animado en vídeo (se graba en tiempo real).',
     drop:'Suelta tus archivos .webp', accept:'.webp,image/webp', test: f => /\.webp$/i.test(f.name) || f.type === 'image/webp',
     opts:{ target:'png', loops:1 },
@@ -1180,7 +1252,7 @@ const TOOLS = {
     run: (file, o, p) => convertWebp(file, o, p),
   },
   webm: {
-    icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="14" height="12" rx="2"/><path d="m16.5 10.5 5-3v9l-5-3"/></svg>', label:'WebM / vídeo',
+    icon:'<svg class="ico tile" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="gv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#67e8f9"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#gv)"/><rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/><rect x="12" y="20" width="28" height="24" rx="6" fill="#fff"/><path d="M40 29l12-7v20l-12-7z" fill="#e0f2fe"/><path d="M22 26v12l10-6z" fill="#0ea5e9"/><g stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M46 46v6M50 44v10M54 47v4"/></g></svg>', label:'WebM / vídeo',
     desc:'Extrae el audio (MP3 o WAV), con editor para recortar, quitar partes y unir el resto, o convierte el vídeo a MP4 con ffmpeg, sin salir del navegador.',
     drop:'Suelta tus vídeos o audios', accept:'.webm,.mp4,.mov,.ogv,.ogg,.m4a,.mp3,.wav,video/*,audio/*',
     test: f => /^(video|audio)\//.test(f.type) || /\.(webm|mp4|mov|ogv|ogg|m4a|mp3|wav|mkv)$/i.test(f.name),
@@ -1196,7 +1268,7 @@ const TOOLS = {
     run: runWebm,
   },
   sticker: {
-    icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12z"/><path d="M9 10h.01M15 10h.01M9.5 14a3.5 3.5 0 0 0 5 0"/></svg>', label:'Stickers WhatsApp',
+    icon:'<svg class="ico tile" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#86efac"/><stop offset="1" stop-color="#16a34a"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#gs)"/><rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/><path d="M15 32a17 17 0 1 1 9 15l-9 3 3-8a17 17 0 0 1-3-10z" fill="#fff"/><circle cx="26" cy="29" r="2.6" fill="#15803d"/><circle cx="38" cy="29" r="2.6" fill="#15803d"/><path d="M25 36a8 8 0 0 0 14 0" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round"/><path d="M42 47l7-7v7z" fill="#bbf7d0"/></svg>', label:'Stickers WhatsApp',
     desc:'Convierte imágenes WebP, JPG o PNG en stickers de 512×512 px y menos de 100 KB.',
     drop:'Suelta tus imágenes', accept:'.webp,.jpg,.jpeg,.png,image/*',
     test: f => /^image\//.test(f.type) || /\.(webp|jpe?g|png)$/i.test(f.name),
@@ -1210,7 +1282,7 @@ const TOOLS = {
     ],
     run: runSticker,
   },
-  url: { icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>', label:'Descargar URL', custom:true, desc:'' },
+  url: { icon:'<svg class="ico tile" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="gu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fda4af"/><stop offset="1" stop-color="#e11d48"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#gu)"/><rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/><path d="M32 14v22" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M22 28l10 10 10-10" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="16" y="44" width="32" height="6" rx="3" fill="#ffe4e6"/></svg>', label:'Descargar URL', custom:true, desc:'' },
 };
 
 // ---------- Estado y UI ----------
@@ -1232,8 +1304,8 @@ function dl(blob, name){
 }
 
 function renderTabs(){
-  $('#tabs').innerHTML = Object.entries(TOOLS).map(([id, t]) =>
-    '<button class="tab' + (ui.tab === id ? ' on' : '') + '" data-tab="' + id + '"><span class="mr-1.5 inline-block align-[-2px]">' + t.icon + '</span>' + t.label + '</button>').join('');
+  $('#tabs').innerHTML = Object.entries(TOOLS).filter(([id]) => LOCAL || id !== 'url').map(([id, t]) =>
+    '<button class="tab' + (ui.tab === id ? ' on' : '') + '" data-tab="' + id + '"><span class="tab-ico">' + t.icon + '</span><span>' + t.label + '</span></button>').join('');
 }
 
 function setTab(id){
@@ -1259,7 +1331,7 @@ function renderPanel(){
   const t = TOOLS[ui.tab];
   if (t.custom){ renderUrlPanel(); return; }
   $('#panel').innerHTML =
-    '<div><h2 class="font-display text-xl font-bold">' + t.icon + ' <span>' + t.label + '</span></h2><p class="mt-1 text-sm text-white/60">' + t.desc + '</p></div>' +
+    '<div><h2 class="font-display flex items-center gap-2.5 text-xl font-bold"><span class="hico">' + t.icon + '</span><span>' + t.label + '</span></h2><p class="mt-1 text-sm text-white/60">' + t.desc + '</p></div>' +
     '<div id="fields" class="mt-5 flex flex-wrap gap-4"></div>' +
     '<label id="drop" class="dz mt-5" tabindex="0"><div class="dzi mb-2 inline-block text-4xl">' + t.icon + '</div>' +
       '<div class="font-semibold">' + t.drop + '</div><div class="mt-1 text-xs text-white/50">o haz clic para elegirlos · puedes seleccionar varios</div>' +
@@ -1310,7 +1382,7 @@ function cardHtml(it){
   const label = { pending:'En cola', working: it.message || 'Procesando…', done:'Listo', error:'Error' }[it.status];
   const thumb = it.thumb
     ? '<img src="' + it.thumb + '" alt="" class="checker h-14 w-14 shrink-0 rounded-xl border border-white/10 object-contain">'
-    : '<div class="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-white/10 text-2xl">' + TOOLS[it.tab].icon + '</div>';
+    : '<div class="thumbico shrink-0">' + TOOLS[it.tab].icon + '</div>';
   let body = '';
   if (it.status === 'pending' && it.tab === 'webm' && TOOLS.webm.opts.target !== 'video')
     body = '<div class="mt-3 flex flex-wrap items-center gap-2"><button class="btn-ghost" style="padding:.4rem .8rem;font-size:.75rem" data-edit="' + it.id + '">✂ Editar / recortar</button>' +
