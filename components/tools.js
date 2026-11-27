@@ -3,5 +3,6 @@ export const TOOLS = [
   { id: 'webp', href: '/webp', color: 'from-fuchsia-300 to-violet-600', pair: ['WebP', 'PNG, JPG'], modes: ['fromwebp', 'towebp'] },
   { id: 'webm', href: '/audio-video', color: 'from-cyan-300 to-blue-600' },
   { id: 'bg', href: '/quitar-fondo', color: 'from-sky-300 to-indigo-500' },
+  { id: 'url', href: '/descargar-url', color: 'from-rose-300 to-rose-600' },
   { id: 'sticker', href: '/stickers', color: 'from-green-300 to-green-600' },
 ];

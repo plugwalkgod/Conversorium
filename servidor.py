@@ -39,6 +39,14 @@ atexit.register(lambda: shutil.rmtree(TMP, ignore_errors=True))
 ALLOWED_ORIGINS = {"http://localhost:%d" % PORT, "http://127.0.0.1:%d" % PORT, "null"}
 # Webs publicadas que pueden usar este servidor (añade otras con CONVERSORIUM_ORIGINS=https://a.com,https://b.com)
 ALLOWED_ORIGINS |= {"https://conversorium.vercel.app"}
+# Versiones de prueba de Vercel del propio proyecto (conversorium-xxxx-mbp21.vercel.app)
+PREVIEW_ORIGIN = re.compile(r"^https://conversorium(-[a-z0-9-]+)?-mbp21\.vercel\.app$")
+
+
+def allowed_origin(o):
+    return o in ALLOWED_ORIGINS or bool(PREVIEW_ORIGIN.match(o or ""))
+
+
 ALLOWED_ORIGINS |= {o.strip().rstrip("/") for o in os.environ.get("CONVERSORIUM_ORIGINS", "").split(",") if o.strip()}
 JOBS = {}
 JOBS_LOCK = threading.Lock()
@@ -243,11 +251,11 @@ class Handler(BaseHTTPRequestHandler):
     # --- utilidades
     def origin_ok(self):
         o = self.headers.get("Origin")
-        return o is None or o in ALLOWED_ORIGINS
+        return o is None or allowed_origin(o)
 
     def cors(self):
         o = self.headers.get("Origin")
-        if o in ALLOWED_ORIGINS:
+        if o and allowed_origin(o):
             self.send_header("Access-Control-Allow-Origin", o)
             self.send_header("Vary", "Origin")
 

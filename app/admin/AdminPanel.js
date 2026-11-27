@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ToolIcon } from '../../components/Icon';
 
-const TOOL_IDS = ['epub', 'webp', 'webm', 'bg', 'sticker'];
+const TOOL_IDS = ['epub', 'webp', 'webm', 'bg', 'sticker', 'url'];
 const input = 'mt-1.5 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition focus:border-violet-400';
 const label = 'block text-xs font-semibold uppercase tracking-wider text-violet-300';
 
@@ -152,6 +152,7 @@ export default function AdminPanel() {
                   <ImagePicker url={t.image} onChange={v => setTool(id, 'image', v)} fallback={<ToolIcon id={id} className="h-10 w-10" />} />
                   <Toggle on={t.visible} onChange={v => setTool(id, 'visible', v)} text={t.visible ? 'Visible' : 'Oculta'} />
                 </div>
+                {id === 'url' && <p className="mt-3 text-xs text-white/45">Necesita que <code>servidor.py</code> esté encendido en el ordenador de quien la use (yt-dlp y ffmpeg). Desactivada por defecto.</p>}
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <Field name="Nombre" value={t.title} onChange={v => setTool(id, 'title', v)} />
                   <Field name="Descripción" value={t.desc} onChange={v => setTool(id, 'desc', v)} />
