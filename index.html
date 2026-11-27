@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conversorium</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@property --a  { syntax:'<color>'; inherits:true; initial-value:#fbbf24; }
+@property --a2 { syntax:'<color>'; inherits:true; initial-value:#f97316; }
+@property --bg { syntax:'<color>'; inherits:true; initial-value:#130d05; }
+
+html,body{ margin:0; padding:0; }
+body{
+  min-height:100vh; overflow-x:hidden;
+  --a:#fbbf24; --a2:#f97316; --bg:#130d05;
+  background-color:var(--bg); color:#f5f5f4;
+  font-family:'Inter',system-ui,sans-serif;
+  transition:--a .9s ease, --a2 .9s ease, --bg .9s ease;
+}
+body[data-theme=webp]   { --a:#e879f9; --a2:#8b5cf6; --bg:#14071f; }
+body[data-theme=webm]   { --a:#22d3ee; --a2:#3b82f6; --bg:#041722; }
+body[data-theme=sticker]{ --a:#4ade80; --a2:#22c55e; --bg:#04150b; }
+body[data-theme=url]    { --a:#fb7185; --a2:#f43f5e; --bg:#1a0509; }
+
+.t-a{ color:var(--a); }
+.grad-text{ background-image:linear-gradient(90deg,var(--a),var(--a2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.font-display{ font-family:'Space Grotesk','Inter',sans-serif; }
+.font-mono2{ font-family:'IBM Plex Mono',monospace; }
+
+/* fondo */
+.blob{ position:absolute; border-radius:9999px; filter:blur(90px); opacity:.34; }
+.b1{ width:48vmax; height:48vmax; top:-20vmax; left:-14vmax; background:var(--a);  animation:f1 19s ease-in-out infinite; }
+.b2{ width:42vmax; height:42vmax; bottom:-18vmax; right:-12vmax; background:var(--a2); animation:f2 23s ease-in-out infinite; }
+.b3{ width:26vmax; height:26vmax; top:35%; left:55%; background:var(--a); opacity:.14; animation:f1 27s ease-in-out infinite reverse; }
+@keyframes f1{ 0%,100%{ transform:translate(0,0) scale(1);} 50%{ transform:translate(6vmax,4vmax) scale(1.12);} }
+@keyframes f2{ 0%,100%{ transform:translate(0,0) scale(1);} 50%{ transform:translate(-5vmax,-6vmax) scale(1.1);} }
+.grid-bg{ position:absolute; inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:52px 52px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 72%); mask-image:radial-gradient(ellipse at 50% 30%,#000 25%,transparent 72%); }
+
+/* controles */
+.btn{ padding:.65rem 1.15rem; border-radius:.8rem; font-weight:700; font-size:.85rem; color:#0b0b10; cursor:pointer; border:0;
+  background-image:linear-gradient(90deg,var(--a),var(--a2)); box-shadow:0 10px 30px -12px var(--a);
+  transition:transform .15s, filter .2s, opacity .2s; }
+.btn:hover{ transform:translateY(-1px); filter:brightness(1.1); }
+.btn:active{ transform:scale(.97); }
+.btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; box-shadow:none; filter:none; }
+.btn-sm{ padding:.4rem .8rem; font-size:.75rem; border-radius:.6rem; }
+.btn-ghost{ padding:.65rem 1.1rem; border-radius:.8rem; font-weight:600; font-size:.85rem; color:#fff; cursor:pointer;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); transition:background .2s, border-color .2s; }
+.btn-ghost:hover{ background:rgba(255,255,255,.12); border-color:var(--a); }
+.sel{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:.65rem; padding:.5rem .75rem; font-size:.85rem; color:#fff; outline:none; font-family:inherit; }
+.sel:focus{ border-color:var(--a); box-shadow:0 0 0 2px var(--a); }
+select.sel option{ background:#151515; color:#fff; }
+.lbl{ font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; color:var(--a); font-weight:700; margin-bottom:.3rem; }
+input[type=checkbox]{ accent-color:var(--a); width:1rem; height:1rem; }
+
+.tab{ border-radius:.9rem; padding:.7rem .6rem; font-weight:600; font-size:.82rem; border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04); color:rgba(255,255,255,.7); cursor:pointer; transition:all .25s; }
+.tab:hover{ background:rgba(255,255,255,.1); color:#fff; transform:translateY(-2px); }
+.tab.on{ background-image:linear-gradient(90deg,var(--a),var(--a2)); color:#0b0b10; border-color:transparent; box-shadow:0 12px 34px -12px var(--a); }
+
+.dz{ display:block; text-align:center; cursor:pointer; border:2px dashed rgba(255,255,255,.2); border-radius:1.25rem; padding:2.2rem 1rem;
+  background:rgba(255,255,255,.03); transition:all .25s; }
+.dz:hover,.dz.drag{ border-color:var(--a); background:rgba(255,255,255,.08); transform:scale(1.01); }
+.dz.drag .dzi{ animation:bob .6s ease-in-out infinite; }
+@keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-8px);} }
+
+.bar{ height:6px; border-radius:9999px; background:rgba(255,255,255,.1); overflow:hidden; }
+.bar > i{ display:block; height:100%; border-radius:9999px; background-image:linear-gradient(90deg,var(--a),var(--a2)); transition:width .25s; position:relative; overflow:hidden; }
+.bar > i::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent); animation:shine 1.2s linear infinite; }
+@keyframes shine{ from{ transform:translateX(-100%);} to{ transform:translateX(100%);} }
+
+.checker{ background-color:#262626; background-image:conic-gradient(#3b3b3b 25%,transparent 0 50%,#3b3b3b 0 75%,transparent 0); background-size:14px 14px; }
+.pop{ animation:pop .4s cubic-bezier(.2,1.5,.4,1); }
+@keyframes pop{ from{ transform:scale(.92); opacity:0;} to{ transform:scale(1); opacity:1;} }
+.working .logo{ animation:spin 2.4s linear infinite; }
+@keyframes spin{ to{ transform:rotate(360deg);} }
+.toast{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:50; padding:.7rem 1.1rem; border-radius:.9rem;
+  background:rgba(0,0,0,.8); border:1px solid var(--a); color:#fff; font-size:.85rem; backdrop-filter:blur(8px); animation:pop .3s; }
+@media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body data-theme="epub">
+
+<div class="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="grid-bg"></div>
+</div>
+
+<main class="relative z-10 mx-auto w-full max-w-3xl px-4 py-10 sm:py-14">
+  <header class="flex items-center gap-4">
+    <div class="logo grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-3xl shadow-2xl" style="background-image:linear-gradient(135deg,var(--a),var(--a2))"><span id="hicon" style="display:inline-block">📚</span></div>
+    <div>
+      <h1 class="font-display text-3xl font-bold leading-tight sm:text-4xl"><span class="grad-text">Conversorium</span></h1>
+      <p class="mt-1 text-sm text-white/60">Todo ocurre en tu navegador. Nada se sube a ningún servidor.</p>
+    </div>
+  </header>
+
+  <nav id="tabs" class="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-3"></nav>
+
+  <section id="panel" class="mt-5 rounded-3xl border border-white/10 bg-black/35 p-5 shadow-2xl backdrop-blur-xl sm:p-7"></section>
+
+  <footer class="mt-8 text-center text-xs text-white/35">Hecho con Tailwind · JSZip · jsPDF · lamejs · yt-dlp · ffmpeg</footer>
+</main>
+
+<script>
+(function(){
+const PAGE_SIZES = { a4: 'a4', a5: 'a5', carta: 'letter' };
+
+function h(tag, attrs, children){
+  const el = document.createElement(tag);
+  if (attrs) for (const k in attrs){
+    if (k === 'class') el.className = attrs[k];
+    else if (k === 'html') el.innerHTML = attrs[k];
+    else el.setAttribute(k, attrs[k]);
+  }
+  (children||[]).forEach(c => el.appendChild(c));
+  return el;
+}
+
+function formatBytes(b){
+  if (b < 1024) return b + ' B';
+  if (b < 1024*1024) return (b/1024).toFixed(0) + ' KB';
+  return (b/1024/1024).toFixed(1) + ' MB';
+}
+
+function resolvePath(baseDir, relPath){
+  if (!relPath) return relPath;
+  relPath = relPath.split('#')[0];
+  if (/^https?:\/\//.test(relPath)) return relPath;
+  if (relPath.startsWith('/')) relPath = relPath.slice(1);
+  const baseParts = baseDir ? baseDir.split('/').filter(Boolean) : [];
+  const relParts = relPath.split('/');
+  const stack = [...baseParts];
+  for (const part of relParts){
+    if (part === '..') stack.pop();
+    else if (part === '.' || part === '') continue;
+    else stack.push(decodeURIComponent(part));
+  }
+  return stack.join('/');
+}
+
+function dirOf(path){
+  return path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+}
+
+function getDcText(doc, tag){
+  let els = doc.getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', tag);
+  if (!els.length) els = doc.getElementsByTagName('dc:' + tag);
+  if (!els.length) els = doc.getElementsByTagName(tag);
+  return els.length ? (els[0].textContent || '').trim() : '';
+}
+
+async function findOpfPath(zip){
+  const containerFile = zip.file('META-INF/container.xml');
+  if (!containerFile) throw new Error('No es un EPUB válido (falta META-INF/container.xml)');
+  const text = await containerFile.async('string');
+  const doc = new DOMParser().parseFromString(text, 'text/xml');
+  const rootfile = doc.getElementsByTagName('rootfile')[0];
+  if (!rootfile) throw new Error('No se encontró el archivo OPF dentro del EPUB');
+  return rootfile.getAttribute('full-path');
+}
+
+async function parseEpub(zip){
+  const opfPath = await findOpfPath(zip);
+  const opfDir = dirOf(opfPath);
+  const opfFile = zip.file(opfPath);
+  if (!opfFile) throw new Error('El archivo OPF referenciado no existe dentro del EPUB');
+  const opfText = await opfFile.async('string');
+  const opfDoc = new DOMParser().parseFromString(opfText, 'text/xml');
+
+  const title = getDcText(opfDoc, 'title') || 'Sin título';
+  const author = getDcText(opfDoc, 'creator') || '';
+
+  const manifest = {};
+  const items = opfDoc.getElementsByTagName('item');
+  for (let i = 0; i < items.length; i++){
+    const it = items[i];
+    manifest[it.getAttribute('id')] = {
+      href: it.getAttribute('href'),
+      mediaType: it.getAttribute('media-type') || '',
+      properties: it.getAttribute('properties') || ''
+    };
+  }
+
+  const spineEls = opfDoc.getElementsByTagName('itemref');
+  const chapterPaths = [];
+  for (let i = 0; i < spineEls.length; i++){
+    const idref = spineEls[i].getAttribute('idref');
+    const item = manifest[idref];
+    if (item && item.href) chapterPaths.push(resolvePath(opfDir, item.href));
+  }
+  if (!chapterPaths.length) throw new Error('El EPUB no tiene capítulos en su spine');
+
+  let coverPath = null;
+  const coverItem = Object.values(manifest).find(it => (it.properties||'').includes('cover-image'));
+  if (coverItem) {
+    coverPath = resolvePath(opfDir, coverItem.href);
+  } else {
+    const metas = opfDoc.getElementsByTagName('meta');
+    for (let i = 0; i < metas.length; i++){
+      if (metas[i].getAttribute('name') === 'cover'){
+        const id = metas[i].getAttribute('content');
+        if (manifest[id]) coverPath = resolvePath(opfDir, manifest[id].href);
+      }
+    }
+  }
+
+  return { title, author, chapterPaths, coverPath };
+}
+
+function extractBlocks(bodyEl){
+  const blocks = [];
+  const CONTAINER_TAGS = new Set(['div','section','article','span','body','figure','figcaption',
+    'ul','ol','table','tbody','thead','tr','td','th','header','footer','main','em','strong','b','i','a','center','small','sub','sup']);
+  function textOf(el){ return (el.textContent || '').replace(/\s+/g,' ').trim(); }
+  function collectImages(el, out){
+    const imgs = el.getElementsByTagName ? el.getElementsByTagName('img') : [];
+    for (let i=0;i<imgs.length;i++){
+      const src = imgs[i].getAttribute('src');
+      if (src) out.push(src);
+    }
+  }
+  function walk(node){
+    const kids = node.childNodes;
+    for (let i=0;i<kids.length;i++){
+      const child = kids[i];
+      if (child.nodeType !== 1) continue;
+      const tag = child.tagName.toLowerCase();
+      if (tag === 'script' || tag === 'style' || tag === 'nav') continue;
+      if (/^h[1-6]$/.test(tag)){
+        const txt = textOf(child);
+        if (txt) blocks.push({ type:'heading', level: parseInt(tag[1],10), text: txt });
+        continue;
+      }
+      if (tag === 'p' || tag === 'blockquote'){
+        const txt = textOf(child);
+        if (txt) blocks.push({ type: tag === 'p' ? 'paragraph' : 'quote', text: txt });
+        const imgSrcs = [];
+        collectImages(child, imgSrcs);
+        imgSrcs.forEach(src => blocks.push({ type:'image', src }));
+        continue;
+      }
+      if (tag === 'li'){
+        const txt = textOf(child);
+        if (txt) blocks.push({ type:'listitem', text: txt });
+        continue;
+      }
+      if (tag === 'img' || tag === 'image'){
+        const src = child.getAttribute('src') ||
+          (child.getAttributeNS && child.getAttributeNS('http://www.w3.org/1999/xlink','href')) ||
+          child.getAttribute('xlink:href');
+        if (src) blocks.push({ type:'image', src });
+        continue;
+      }
+      if (tag === 'hr'){ blocks.push({ type:'hr' }); continue; }
+      if (CONTAINER_TAGS.has(tag)){ walk(child); continue; }
+      walk(child);
+    }
+  }
+  walk(bodyEl);
+  return blocks;
+}
+
+async function loadChapterBlocks(zip, fullPath){
+  const file = zip.file(fullPath);
+  if (!file) return [];
+  const text = await file.async('string');
+  let doc = new DOMParser().parseFromString(text, 'application/xhtml+xml');
+  if (doc.getElementsByTagName('parsererror').length){
+    doc = new DOMParser().parseFromString(text, 'text/html');
+  }
+  const body = doc.getElementsByTagName('body')[0] || doc.documentElement;
+  return extractBlocks(body);
+}
+
+const IMG_MIME = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp' };
+
+async function loadImageAsset(zip, fullPath){
+  const ext = (fullPath.split('.').pop() || '').toLowerCase();
+  const mime = IMG_MIME[ext];
+  if (!mime) return null;
+  const file = zip.file(fullPath);
+  if (!file) return null;
+  let base64;
+  try { base64 = await file.async('base64'); } catch(e){ return null; }
+  const dataUrl = 'data:' + mime + ';base64,' + base64;
+  const dims = await new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+  if (!dims || !dims.w || !dims.h) return null;
+  const format = mime === 'image/png' ? 'PNG' : (mime === 'image/webp' ? 'WEBP' : 'JPEG');
+  return { dataUrl, format, w: dims.w, h: dims.h };
+}
+
+function mmFromPt(pt){ return pt * 0.352778; }
+
+function makeLayoutState(doc, margin){
+  const pw = doc.internal.pageSize.getWidth();
+  const ph = doc.internal.pageSize.getHeight();
+  return { pageWidth: pw, pageHeight: ph, margin, contentWidth: pw - margin*2, y: margin };
+}
+
+function ensureSpace(doc, state, needed){
+  if (state.y + needed > state.pageHeight - state.margin){
+    doc.addPage();
+    state.y = state.margin;
+    return true;
+  }
+  return false;
+}
+
+function drawParagraphLike(doc, state, text, opts){
+  const { fontSize, font='times', style='normal', indent=0, lineMult=1.32, before=0, after=2.6, align='left' } = opts;
+  state.y += before;
+  doc.setFont(font, style);
+  doc.setFontSize(fontSize);
+  const width = state.contentWidth - indent*2;
+  const lines = doc.splitTextToSize(text, width);
+  const lh = mmFromPt(fontSize) * lineMult;
+  for (const line of lines){
+    ensureSpace(doc, state, lh);
+    doc.text(line, state.margin + indent, state.y + lh*0.78, { align });
+    state.y += lh;
+  }
+  state.y += after;
+}
+
+function drawHeading(doc, state, text, level){
+  const sizes = { 1:19, 2:16.5, 3:14.5, 4:12.5, 5:12, 6:11.5 };
+  const fontSize = sizes[level] || 12;
+  ensureSpace(doc, state, mmFromPt(fontSize)*1.4 + 8);
+  drawParagraphLike(doc, state, text, { fontSize, font:'times', style:'bold', before: level<=2?9:6, after: 4, lineMult:1.25 });
+}
+
+async function drawImageBlock(doc, state, zip, chapterDir, src){
+  const fullPath = resolvePath(chapterDir, src);
+  const asset = await loadImageAsset(zip, fullPath);
+  if (!asset) return;
+  let dispW = state.contentWidth;
+  let dispH = dispW * (asset.h / asset.w);
+  const maxH = state.pageHeight - state.margin*2;
+  if (dispH > maxH){
+    dispH = maxH;
+    dispW = dispH * (asset.w / asset.h);
+  }
+  ensureSpace(doc, state, dispH);
+  const x = state.margin + (state.contentWidth - dispW) / 2;
+  try { doc.addImage(asset.dataUrl, asset.format, x, state.y, dispW, dispH); } catch(e){ return; }
+  state.y += dispH + 4;
+}
+
+async function renderBlocks(doc, state, zip, chapterDir, blocks, fontSize){
+  for (const b of blocks){
+    if (b.type === 'heading') drawHeading(doc, state, b.text, b.level);
+    else if (b.type === 'paragraph') drawParagraphLike(doc, state, b.text, { fontSize, align:'left', after: fontSize*0.28 });
+    else if (b.type === 'quote') drawParagraphLike(doc, state, b.text, { fontSize, style:'italic', indent: 7, after: fontSize*0.3 });
+    else if (b.type === 'listitem') drawParagraphLike(doc, state, '•  ' + b.text, { fontSize, indent: 4, after: fontSize*0.2 });
+    else if (b.type === 'image') await drawImageBlock(doc, state, zip, chapterDir, b.src);
+    else if (b.type === 'hr'){ ensureSpace(doc, state, 6); state.y += 3;
+      doc.setDrawColor(160); doc.line(state.margin + state.contentWidth*0.3, state.y, state.margin + state.contentWidth*0.7, state.y);
+      state.y += 5;
+    }
+  }
+}
+
+async function convertEpubToPdf(file, opts, onProgress){
+  const { jsPDF } = window.jspdf;
+  const buf = await file.arrayBuffer();
+  onProgress(4, 'Leyendo archivo…');
+  const zip = await JSZip.loadAsync(buf);
+  onProgress(10, 'Analizando estructura EPUB…');
+  const meta = await parseEpub(zip);
+
+  const doc = new jsPDF({ unit:'mm', format: PAGE_SIZES[opts.pageSize] || 'a4' });
+  const margin = 20;
+  let state = makeLayoutState(doc, margin);
+
+  // Portada
+  let coverAsset = null;
+  if (meta.coverPath){
+    onProgress(14, 'Cargando portada…');
+    coverAsset = await loadImageAsset(zip, meta.coverPath);
+  }
+  if (coverAsset){
+    let dispW = state.contentWidth * 0.72;
+    let dispH = dispW * (coverAsset.h / coverAsset.w);
+    const maxH = state.pageHeight - margin*2 - 40;
+    if (dispH > maxH){ dispH = maxH; dispW = dispH * (coverAsset.w / coverAsset.h); }
+    const x = margin + (state.contentWidth - dispW)/2;
+    const y = margin + 10;
+    try { doc.addImage(coverAsset.dataUrl, coverAsset.format, x, y, dispW, dispH); } catch(e){}
+    state.y = y + dispH + 14;
+  } else {
+    state.y = state.pageHeight * 0.36;
+  }
+  doc.setFont('times','bold'); doc.setFontSize(24);
+  const titleLines = doc.splitTextToSize(meta.title, state.contentWidth * 0.85);
+  titleLines.forEach(line => { state.y += 10; doc.text(line, state.pageWidth/2, state.y, { align:'center' }); });
+  if (meta.author){
+    doc.setFont('times','italic'); doc.setFontSize(13);
+    state.y += 12;
+    doc.text(meta.author, state.pageWidth/2, state.y, { align:'center' });
+  }
+
+  const total = meta.chapterPaths.length;
+  for (let i = 0; i < total; i++){
+    const pct = 16 + Math.round((i/total) * 76);
+    onProgress(pct, 'Convirtiendo capítulo ' + (i+1) + ' de ' + total + '…');
+    const chPath = meta.chapterPaths[i];
+    const chapterDir = dirOf(chPath);
+    let blocks = [];
+    try { blocks = await loadChapterBlocks(zip, chPath); } catch(e){ blocks = []; }
+    if (!blocks.some(b => b.type === 'heading')){
+      blocks = [{ type:'heading', level:2, text:'Capítulo ' + (i+1) }, ...blocks];
+    }
+    doc.addPage();
+    state = makeLayoutState(doc, margin);
+    await renderBlocks(doc, state, zip, chapterDir, blocks, opts.fontSize);
+  }
+
+  onProgress(95, 'Añadiendo numeración…');
+  const pageCount = doc.internal.getNumberOfPages();
+  doc.setFont('helvetica','normal');
+  for (let p = 2; p <= pageCount; p++){
+    doc.setPage(p);
+    doc.setFontSize(9);
+    doc.setTextColor(130);
+    doc.text(String(p-1), state.pageWidth/2, state.pageHeight - 10, { align:'center' });
+    doc.setTextColor(0);
+  }
+
+  onProgress(100, 'Listo');
+  return { blob: doc.output('blob'), title: meta.title };
+}
+
+
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function pickVideoMime(){
+  const c = ['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+  return c.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || null;
+}
+
+async function decodeWebpFrames(file){
+  const frames = [];
+  if ('ImageDecoder' in window){
+    const dec = new ImageDecoder({ data: await file.arrayBuffer(), type: 'image/webp' });
+    await dec.tracks.ready;
+    const n = dec.tracks.selectedTrack.frameCount;
+    for (let i = 0; i < n; i++){
+      const { image } = await dec.decode({ frameIndex: i });
+      const bmp = await createImageBitmap(image);
+      const dur = Math.max(20, (image.duration || 100000) / 1000);
+      image.close();
+      frames.push({ bmp, dur });
+    }
+    if (n === 1) frames[0].dur = 3000;
+  } else {
+    frames.push({ bmp: await createImageBitmap(file), dur: 3000 });
+  }
+  return frames;
+}
+
+async function convertWebp(file, o, onProgress){
+  const base = file.name.replace(/\.webp$/i, '') || 'imagen';
+  if (o.target === 'png' || o.target === 'jpg'){
+    onProgress(30, 'Decodificando…');
+    const bmp = await createImageBitmap(file);
+    const c = document.createElement('canvas');
+    c.width = bmp.width; c.height = bmp.height;
+    const ctx = c.getContext('2d');
+    if (o.target === 'jpg'){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }
+    ctx.drawImage(bmp, 0, 0);
+    const blob = await new Promise(r => c.toBlob(r, o.target === 'png' ? 'image/png' : 'image/jpeg', 0.92));
+    if (!blob) throw new Error('No se pudo generar la imagen.');
+    return { blob, name: base + '.' + o.target };
+  }
+  const mime = pickVideoMime();
+  if (!mime) throw new Error('Tu navegador no puede grabar vídeo (MediaRecorder). Prueba con Chrome, Edge o Firefox.');
+  onProgress(5, 'Leyendo fotogramas…');
+  const frames = await decodeWebpFrames(file);
+  const w = frames[0].bmp.width & ~1, hgt = frames[0].bmp.height & ~1;
+  const c = document.createElement('canvas'); c.width = w || 2; c.height = hgt || 2;
+  const ctx = c.getContext('2d');
+  const stream = c.captureStream(30);
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 5000000 });
+  const chunks = [];
+  rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  const stopped = new Promise(r => rec.onstop = r);
+  rec.start();
+  const totalSteps = frames.length * o.loops; let step = 0;
+  for (let l = 0; l < o.loops; l++){
+    for (const f of frames){
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(f.bmp, 0, 0, c.width, c.height);
+      step++;
+      onProgress(10 + Math.round(step / totalSteps * 85), 'Grabando vídeo…');
+      await sleep(f.dur);
+    }
+  }
+  await sleep(120);
+  rec.stop(); await stopped;
+  const type = mime.startsWith('video/mp4') ? 'video/mp4' : 'video/webm';
+  return { blob: new Blob(chunks, { type }), name: base + (type === 'video/mp4' ? '.mp4' : '.webm') };
+}
+
+
+
+// ---------- WebM / vídeo → audio o vídeo ----------
+function floatTo16(f){
+  const o = new Int16Array(f.length);
+  for (let i = 0; i < f.length; i++){ const s = Math.max(-1, Math.min(1, f[i])); o[i] = s < 0 ? s * 0x8000 : s * 0x7FFF; }
+  return o;
+}
+
+async function decodeAudio(file){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ctx = new AC();
+  try { return await ctx.decodeAudioData(await file.arrayBuffer()); }
+  catch (e){ throw new Error('No se pudo extraer el audio: el archivo no tiene pista de audio o tu navegador no la soporta.'); }
+  finally { if (ctx.close) ctx.close(); }
+}
+
+function encodeWav(buf){
+  const ch = Math.min(2, buf.numberOfChannels), sr = buf.sampleRate, n = buf.length, bytes = n * ch * 2;
+  const ab = new ArrayBuffer(44 + bytes), dv = new DataView(ab);
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0,'RIFF'); dv.setUint32(4, 36 + bytes, true); ws(8,'WAVE'); ws(12,'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, ch, true);
+  dv.setUint32(24, sr, true); dv.setUint32(28, sr * ch * 2, true); dv.setUint16(32, ch * 2, true); dv.setUint16(34, 16, true);
+  ws(36,'data'); dv.setUint32(40, bytes, true);
+  const chans = []; for (let c = 0; c < ch; c++) chans.push(buf.getChannelData(c));
+  let off = 44;
+  for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++){
+    const s = Math.max(-1, Math.min(1, chans[c][i]));
+    dv.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off += 2;
+  }
+  return new Blob([ab], { type:'audio/wav' });
+}
+
+async function encodeMp3(buf, kbps, onFrac){
+  if (!window.lamejs) throw new Error('No se cargó el codificador MP3 (comprueba tu conexión a internet).');
+  const ch = Math.min(2, buf.numberOfChannels);
+  const enc = new lamejs.Mp3Encoder(ch, buf.sampleRate, kbps);
+  const L = floatTo16(buf.getChannelData(0));
+  const R = ch > 1 ? floatTo16(buf.getChannelData(1)) : null;
+  const out = []; const block = 1152 * 16; let k = 0;
+  for (let i = 0; i < L.length; i += block){
+    const d = ch > 1 ? enc.encodeBuffer(L.subarray(i, i + block), R.subarray(i, i + block)) : enc.encodeBuffer(L.subarray(i, i + block));
+    if (d.length) out.push(new Uint8Array(d));
+    if (++k % 25 === 0){ onFrac(i / L.length); await sleep(0); }
+  }
+  const end = enc.flush(); if (end.length) out.push(new Uint8Array(end));
+  return new Blob(out, { type:'audio/mpeg' });
+}
+
+async function mediaToVideo(file, base, p){
+  const mime = pickVideoMime();
+  if (!mime) throw new Error('Tu navegador no puede grabar vídeo. Usa Chrome o Edge.');
+  const url = URL.createObjectURL(file);
+  const v = document.createElement('video');
+  v.src = url; v.playsInline = true; v.preload = 'auto';
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let actx = null;
+  try {
+    p(5, 'Cargando vídeo…');
+    await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('No se pudo leer este archivo como vídeo.')); });
+    const cap = v.captureStream || v.mozCaptureStream;
+    if (!cap) throw new Error('Tu navegador no permite capturar vídeo. Usa Chrome, Edge o Firefox.');
+    actx = new AC();
+    const srcN = actx.createMediaElementSource(v);
+    const dest = actx.createMediaStreamDestination();
+    srcN.connect(dest);
+    await actx.resume();
+    const ended = new Promise(r => { v.onended = r; });
+    await v.play();
+    const vs = cap.call(v);
+    let tries = 0; while (!vs.getVideoTracks().length && tries++ < 20) await sleep(50);
+    if (!vs.getVideoTracks().length) throw new Error('El archivo no tiene pista de vídeo.');
+    const stream = new MediaStream([...vs.getVideoTracks(), ...dest.stream.getAudioTracks()]);
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6000000 });
+    const chunks = [];
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    const stopped = new Promise(r => { rec.onstop = r; });
+    rec.start(250);
+    const timer = setInterval(() => {
+      const d = v.duration;
+      p(isFinite(d) && d > 0 ? 10 + Math.round(v.currentTime / d * 85) : 50, 'Grabando…');
+    }, 300);
+    await ended;
+    clearInterval(timer);
+    await sleep(150);
+    rec.stop(); await stopped;
+    const type = mime.startsWith('video/mp4') ? 'video/mp4' : 'video/webm';
+    return { blob: new Blob(chunks, { type }), name: base + (type === 'video/mp4' ? '.mp4' : '.webm') };
+  } finally {
+    URL.revokeObjectURL(url);
+    if (actx && actx.close) actx.close();
+  }
+}
+
+// ---------- Edición de audio (cortar / recortar / unir) ----------
+const fmtT = t => { t = Math.max(0, t); const m = Math.floor(t / 60); const s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); };
+
+function mergeCuts(c){
+  c = c.map(r => [r[0], r[1]]).sort((x, y) => x[0] - y[0]);
+  const out = [];
+  for (const r of c){
+    if (out.length && r[0] <= out[out.length - 1][1]) out[out.length - 1][1] = Math.max(out[out.length - 1][1], r[1]);
+    else out.push(r);
+  }
+  return out;
+}
+function keptRanges(dur, cuts){
+  const out = []; let t = 0;
+  for (const [s, e] of mergeCuts(cuts)){ if (s > t) out.push([t, Math.min(s, dur)]); t = Math.max(t, e); }
+  if (t < dur) out.push([t, dur]);
+  return out.filter(([a, b]) => b - a > 0.005);
+}
+function makeBuf(ch, len, sr){
+  try { return new AudioBuffer({ numberOfChannels: ch, length: len, sampleRate: sr }); }
+  catch (e){ const AC = window.AudioContext || window.webkitAudioContext; const c = new AC(); const b = c.createBuffer(ch, len, sr); if (c.close) c.close(); return b; }
+}
+function pieceFromCuts(buf, cuts){
+  const ranges = keptRanges(buf.duration, cuts);
+  if (!ranges.length) throw new Error('No queda audio: has cortado todo.');
+  const sr = buf.sampleRate, ch = Math.min(2, buf.numberOfChannels);
+  const segs = ranges.map(([a, b]) => [Math.max(0, Math.round(a * sr)), Math.min(buf.length, Math.round(b * sr))]).filter(([a, b]) => b > a);
+  const total = segs.reduce((x, [a, b]) => x + (b - a), 0);
+  const out = makeBuf(ch, total, sr);
+  let off = 0;
+  segs.forEach(([a, b], k) => {
+    const len = b - a, J = Math.min(Math.round(sr * 0.008), Math.floor(len / 2));
+    for (let c = 0; c < ch; c++){
+      const d = out.getChannelData(c);
+      d.set(buf.getChannelData(c).subarray(a, b), off);
+      if (k > 0) for (let j = 0; j < J; j++) d[off + j] *= j / J;
+      if (k < segs.length - 1) for (let j = 0; j < J; j++) d[off + len - 1 - j] *= j / J;
+    }
+    off += len;
+  });
+  return out;
+}
+function concatBuffers(bufs){
+  const sr = bufs[0].sampleRate;
+  const ch = Math.min(2, Math.max(...bufs.map(b => b.numberOfChannels)));
+  const total = bufs.reduce((a, b) => a + b.length, 0);
+  const out = makeBuf(ch, total, sr);
+  let off = 0;
+  for (const b of bufs){
+    for (let c = 0; c < ch; c++) out.getChannelData(c).set(b.getChannelData(Math.min(c, b.numberOfChannels - 1)), off);
+    off += b.length;
+  }
+  return out;
+}
+function applyFades(buf, o){
+  if (!o.fadeIn && !o.fadeOut) return buf;
+  const ch = Math.min(2, buf.numberOfChannels);
+  const out = makeBuf(ch, buf.length, buf.sampleRate);
+  const F = Math.min(Math.round(buf.sampleRate), Math.floor(buf.length / 2));
+  for (let c = 0; c < ch; c++){
+    const d = out.getChannelData(c);
+    d.set(buf.getChannelData(c));
+    if (o.fadeIn) for (let j = 0; j < F; j++) d[j] *= j / F;
+    if (o.fadeOut) for (let j = 0; j < F; j++) d[buf.length - 1 - j] *= j / F;
+  }
+  return out;
+}
+async function encodeAudio(buf, o, p){
+  if (o.target === 'wav'){ p(70, 'Codificando WAV…'); await sleep(20); return encodeWav(buf); }
+  return encodeMp3(buf, o.kbps, f => p(15 + Math.round(f * 80), 'Codificando MP3…'));
+}
+
+async function runWebm(file, o, p, it){
+  const base = file.name.replace(/\.[^.]+$/, '') || 'archivo';
+  if (o.target === 'video') return o.useServer ? serverConvert(file, 'mp4', p) : mediaToVideo(file, base, p);
+  p(8, 'Extrayendo audio…');
+  let buf = (it && it.audioBuf) || await decodeAudio(file);
+  const edited = !!(it && it.cuts && it.cuts.length);
+  if (edited) buf = pieceFromCuts(buf, it.cuts);
+  buf = applyFades(buf, o);
+  const blob = await encodeAudio(buf, o, p);
+  if (it) it.audioBuf = null;
+  return { blob, name: base + (edited ? '-editado' : '') + '.' + o.target };
+}
+
+async function runMerge(tab){
+  const t = TOOLS[tab];
+  if (tab !== 'webm' || !t.opts.merge || t.opts.target === 'video') return false;
+  const group = queues[tab].filter(i => i.status === 'pending');
+  if (group.length < 2) return false;
+  const o = Object.assign({}, t.opts), lead = group[0];
+  const upd = () => { if (ui.tab === tab) updateList(); };
+  group.forEach(i => { i.status = 'working'; i.progress = 0; i.message = 'Esperando…'; });
+  try {
+    const bufs = [];
+    for (let k = 0; k < group.length; k++){
+      const i = group[k];
+      lead.progress = Math.round(k / group.length * 40); lead.message = 'Decodificando ' + (k + 1) + '/' + group.length + '…'; upd();
+      let b = i.audioBuf || await decodeAudio(i.file);
+      if (i.cuts && i.cuts.length) b = pieceFromCuts(b, i.cuts);
+      bufs.push(b);
+    }
+    const merged = applyFades(concatBuffers(bufs), o);
+    const blob = await encodeAudio(merged, o, (pct, msg) => { lead.progress = 40 + Math.round(pct * 0.6); lead.message = msg; upd(); });
+    lead.result = { blob, name: 'unido-' + lead.file.name.replace(/\.[^.]+$/, '') + '.' + o.target };
+    group.forEach((i, k) => { i.status = 'done'; i.audioBuf = null; if (k){ i.merged = true; i.result = null; } });
+  } catch (e){
+    console.error(e);
+    group.forEach(i => { i.status = 'error'; i.error = (e && e.message) || 'No se pudieron unir los audios.'; });
+  }
+  return true;
+}
+
+async function openEditor(it){
+  toast('Cargando audio…');
+  try { if (!it.audioBuf) it.audioBuf = await decodeAudio(it.file); }
+  catch (e){ toast(e.message); return; }
+  const buf = it.audioBuf, dur = buf.duration;
+  let cuts = (it.cuts || []).map(c => c.slice());
+  const hist = []; let sel = null, drag = null, pb = null;
+
+  const NP = Math.max(50, Math.min(1200, buf.length)), peaks = [];
+  const chd = []; for (let c = 0; c < Math.min(2, buf.numberOfChannels); c++) chd.push(buf.getChannelData(c));
+  const step = Math.max(1, Math.floor(buf.length / NP));
+  for (let i = 0; i < NP; i++){
+    let mn = 0, mx = 0; const a = i * step, b = Math.min(buf.length, a + step), st = Math.max(1, Math.floor((b - a) / 64));
+    for (const d of chd) for (let k = a; k < b; k += st){ const v = d[k]; if (v < mn) mn = v; if (v > mx) mx = v; }
+    peaks.push([mn, mx]);
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fixed inset-0 z-50 grid place-items-center bg-black/70 p-3 backdrop-blur-sm';
+  wrap.innerHTML =
+    '<div class="pop max-h-[95vh] w-full max-w-3xl overflow-auto rounded-3xl border border-white/10 bg-[#0d0d12]/95 p-5 shadow-2xl sm:p-6">' +
+      '<div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="font-display text-xl font-bold">✂ Editar audio</h3>' +
+      '<p class="truncate text-xs text-white/50">' + esc(it.file.name) + '</p></div></div>' +
+      '<p class="mt-3 text-sm text-white/65">Arrastra sobre la onda para seleccionar un trozo. Lo que quites desaparece y <b class="t-a">el resto se une solo</b>.</p>' +
+      '<canvas id="edcv" class="mt-3 h-36 w-full cursor-crosshair rounded-xl border border-white/10 bg-black/40" style="touch-action:none"></canvas>' +
+      '<div class="font-mono2 mt-2 flex flex-wrap justify-between gap-2 text-xs text-white/55"><span id="edinfo"></span><span id="edsel"></span></div>' +
+      '<div class="mt-3 flex flex-wrap items-end gap-3">' +
+        '<div><div class="lbl">Inicio (s)</div><input id="eds" type="number" min="0" step="0.1" class="sel w-28"></div>' +
+        '<div><div class="lbl">Fin (s)</div><input id="ede" type="number" min="0" step="0.1" class="sel w-28"></div>' +
+        '<button class="btn-ghost" data-ed="plsel">▶ Selección</button>' +
+        '<button class="btn-ghost" data-ed="plall">▶ Resultado</button>' +
+        '<button class="btn-ghost" data-ed="stop">■ Parar</button>' +
+      '</div>' +
+      '<div class="mt-4 flex flex-wrap gap-2">' +
+        '<button class="btn" data-ed="cut">✂ Quitar selección</button>' +
+        '<button class="btn-ghost" data-ed="keep">Conservar solo selección</button>' +
+        '<button class="btn-ghost" data-ed="undo">↶ Deshacer</button>' +
+        '<button class="btn-ghost" data-ed="reset">Restablecer</button>' +
+      '</div>' +
+      '<div class="mt-5 flex justify-end gap-2 border-t border-white/10 pt-4">' +
+        '<button class="btn-ghost" data-ed="cancel">Cancelar</button><button class="btn" data-ed="apply">Aplicar cambios</button></div>' +
+    '</div>';
+  document.body.appendChild(wrap);
+  const cv = wrap.querySelector('#edcv'), inS = wrap.querySelector('#eds'), inE = wrap.querySelector('#ede');
+
+  const keptDur = () => keptRanges(dur, cuts).reduce((a, [s, e]) => a + (e - s), 0);
+
+  function draw(){
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+    if (cv.width !== Math.round(W * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    const acc = getComputedStyle(document.body).getPropertyValue('--a').trim() || '#fff';
+    const bw = Math.max(1, W / peaks.length);
+    g.fillStyle = 'rgba(255,255,255,.75)';
+    peaks.forEach(([mn, mx], i) => { const y1 = H/2 - mx * H * 0.47, y2 = H/2 - mn * H * 0.47; g.fillRect(i / peaks.length * W, y1, bw, Math.max(1, y2 - y1)); });
+    g.fillStyle = 'rgba(244,63,94,.45)';
+    cuts.forEach(([s, e]) => g.fillRect(s / dur * W, 0, (e - s) / dur * W, H));
+    if (sel){
+      g.globalAlpha = .28; g.fillStyle = acc; g.fillRect(sel[0] / dur * W, 0, (sel[1] - sel[0]) / dur * W, H); g.globalAlpha = 1;
+      g.fillStyle = acc; g.fillRect(sel[0] / dur * W - 1, 0, 2, H); g.fillRect(sel[1] / dur * W - 1, 0, 2, H);
+    }
+    if (pb && pb.pos != null){ g.fillStyle = '#fff'; g.fillRect(pb.pos / dur * W - 1, 0, 2, H); }
+  }
+  function refresh(){
+    wrap.querySelector('#edinfo').textContent = 'Original ' + fmtT(dur) + ' · Resultado ' + fmtT(keptDur()) + ' · ' + cuts.length + ' corte(s)';
+    wrap.querySelector('#edsel').textContent = sel ? 'Selección ' + fmtT(sel[0]) + ' → ' + fmtT(sel[1]) + ' (' + (sel[1] - sel[0]).toFixed(1) + ' s)' : 'Sin selección';
+    inS.value = sel ? sel[0].toFixed(1) : ''; inE.value = sel ? sel[1].toFixed(1) : '';
+    wrap.querySelector('[data-ed=cut]').disabled = !sel;
+    wrap.querySelector('[data-ed=keep]').disabled = !sel;
+    wrap.querySelector('[data-ed=plsel]').disabled = !sel;
+    wrap.querySelector('[data-ed=undo]').disabled = !hist.length;
+    wrap.querySelector('[data-ed=reset]').disabled = !cuts.length;
+    draw();
+  }
+  const tAt = e => { const r = cv.getBoundingClientRect(); return Math.max(0, Math.min(dur, (e.clientX - r.left) / r.width * dur)); };
+  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); drag = tAt(e); sel = null; refresh(); });
+  cv.addEventListener('pointermove', e => {
+    if (drag == null) return;
+    const t = tAt(e); sel = [Math.min(drag, t), Math.max(drag, t)];
+    if (sel[1] - sel[0] < 0.05) sel = null;
+    refresh();
+  });
+  cv.addEventListener('pointerup', () => { drag = null; });
+  const fromInputs = () => {
+    let a = parseFloat(inS.value), b = parseFloat(inE.value);
+    if (isNaN(a) || isNaN(b)) return;
+    a = Math.max(0, Math.min(dur, a)); b = Math.max(0, Math.min(dur, b));
+    sel = b - a > 0.04 ? [Math.min(a, b), Math.max(a, b)] : null;
+    const ae = document.activeElement; refresh(); if (ae === inS) inS.focus(); if (ae === inE) inE.focus();
+  };
+  inS.addEventListener('change', fromInputs); inE.addEventListener('change', fromInputs);
+
+  function stopPb(){ if (pb){ cancelAnimationFrame(pb.raf); try { pb.ctx.close(); } catch (e){} pb = null; draw(); } }
+  function play(ranges){
+    stopPb(); if (!ranges.length) return;
+    const AC = window.AudioContext || window.webkitAudioContext, ctx = new AC();
+    let when = ctx.currentTime + 0.06; const segs = [];
+    for (const [a, b] of ranges){
+      const s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination); s.start(when, a, b - a);
+      segs.push({ a, b, t0: when }); when += b - a;
+    }
+    pb = { ctx, segs, end: when, raf: 0, pos: null };
+    const tick = () => {
+      if (!pb) return;
+      const now = pb.ctx.currentTime;
+      if (now >= pb.end){ stopPb(); return; }
+      const sg = pb.segs.find(s => now >= s.t0 && now < s.t0 + (s.b - s.a));
+      if (sg) pb.pos = sg.a + (now - sg.t0);
+      draw(); pb.raf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  const push = () => hist.push(cuts.map(c => c.slice()));
+  const close = () => { stopPb(); window.removeEventListener('resize', draw); document.removeEventListener('keydown', onKey); wrap.remove(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  window.addEventListener('resize', draw);
+
+  wrap.addEventListener('click', e => {
+    const b = e.target.closest('[data-ed]');
+    if (!b){ if (e.target === wrap) close(); return; }
+    const a = b.dataset.ed;
+    if (a === 'cut' && sel){ push(); cuts = mergeCuts(cuts.concat([sel])); sel = null; }
+    else if (a === 'keep' && sel){ push(); cuts = mergeCuts(cuts.concat([[0, sel[0]], [sel[1], dur]].filter(r => r[1] - r[0] > 0.001))); sel = null; }
+    else if (a === 'undo' && hist.length){ cuts = hist.pop(); }
+    else if (a === 'reset' && cuts.length){ push(); cuts = []; }
+    else if (a === 'plsel' && sel){ play([sel]); }
+    else if (a === 'plall'){ play(keptRanges(dur, cuts)); }
+    else if (a === 'stop'){ stopPb(); }
+    else if (a === 'cancel'){ close(); return; }
+    else if (a === 'apply'){
+      if (!keptRanges(dur, cuts).length){ toast('No queda audio: has cortado todo.'); return; }
+      it.cuts = cuts; it.keptDur = keptDur(); close(); updateList(); return;
+    }
+    refresh();
+  });
+  refresh();
+}
+
+// ---------- Stickers de WhatsApp ----------
+async function runSticker(file, o, p){
+  const base = file.name.replace(/\.[^.]+$/, '') || 'sticker';
+  p(10, 'Cargando imagen…');
+  const bmp = await createImageBitmap(file);
+  const S = 512, m = o.outline ? 14 : 0;
+  const sc = o.fit === 'cover' ? Math.max(S / bmp.width, S / bmp.height) : Math.min((S - 2*m) / bmp.width, (S - 2*m) / bmp.height);
+  const dw = bmp.width * sc, dh = bmp.height * sc, dx = (S - dw) / 2, dy = (S - dh) / 2;
+
+  p(30, 'Componiendo sticker…');
+  const baseC = document.createElement('canvas'); baseC.width = baseC.height = S;
+  const bctx = baseC.getContext('2d');
+  const rx = Math.max(dx, 0), ry = Math.max(dy, 0), rw = Math.min(dw, S), rh = Math.min(dh, S);
+  if (o.shape === 'circle'){
+    bctx.beginPath(); bctx.arc(S/2, S/2, Math.min(rw, rh)/2, 0, Math.PI*2); bctx.clip();
+  } else if (o.shape === 'round' && bctx.roundRect){
+    bctx.beginPath(); bctx.roundRect(rx, ry, rw, rh, Math.min(rw, rh) * 0.18); bctx.clip();
+  }
+  bctx.drawImage(bmp, dx, dy, dw, dh);
+
+  const out = document.createElement('canvas'); out.width = out.height = S;
+  const ctx = out.getContext('2d');
+  if (o.outline){
+    const sil = document.createElement('canvas'); sil.width = sil.height = S;
+    const sctx = sil.getContext('2d');
+    sctx.drawImage(baseC, 0, 0);
+    sctx.globalCompositeOperation = 'source-in'; sctx.fillStyle = '#fff'; sctx.fillRect(0, 0, S, S);
+    for (const r of [4, 8, 11]) for (let a = 0; a < Math.PI * 2; a += Math.PI / 18) ctx.drawImage(sil, Math.cos(a) * r, Math.sin(a) * r);
+  }
+  ctx.drawImage(baseC, 0, 0);
+
+  p(55, 'Ajustando peso (máx. 100 KB)…');
+  let blob = null;
+  for (const q of [0.92, 0.82, 0.72, 0.62, 0.52, 0.42, 0.32, 0.22, 0.12]){
+    blob = await new Promise(r => out.toBlob(r, 'image/webp', q));
+    if (!blob || blob.type !== 'image/webp') throw new Error('Tu navegador no puede crear imágenes WebP. Usa Chrome o Edge.');
+    if (blob.size <= 100 * 1024) break;
+    await sleep(0);
+  }
+  return { blob, name: 'sticker-' + base + '.webp', warn: blob.size > 100 * 1024 };
+}
+
+// ---------- Servidor local (yt-dlp + ffmpeg) ----------
+const API = (location.protocol.indexOf('http') === 0 && location.port === '8765') ? '' : 'http://localhost:8765';
+let srv = null;
+const netMsg = e => (e instanceof TypeError) ? 'No se pudo contactar con el servidor local. ¿Está ejecutándose servidor.py?' : ((e && e.message) || 'Error desconocido');
+
+async function checkServer(){
+  try {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 1500);
+    const r = await fetch(API + '/api/status', { signal: ctl.signal });
+    clearTimeout(to); srv = await r.json();
+  } catch (e){ srv = null; }
+  return srv;
+}
+
+async function waitJob(id, p){
+  for (;;){
+    await sleep(600);
+    const r = await fetch(API + '/api/job/' + id);
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Se perdió el trabajo en el servidor.');
+    if (j.status === 'error') throw new Error(j.error || 'Error en el servidor');
+    p(j.percent || 0, j.message || '');
+    if (j.status === 'done') return j;
+  }
+}
+
+async function serverConvert(file, target, p){
+  if (!srv || !srv.ffmpeg) await checkServer();
+  if (!srv || !srv.ffmpeg) throw new Error('Servidor local no disponible o sin ffmpeg. Arranca servidor.py y abre http://localhost:8765');
+  p(3, 'Subiendo al servidor…');
+  let r;
+  try { r = await fetch(API + '/api/convert?target=' + target + '&name=' + encodeURIComponent(file.name), { method:'POST', body:file }); }
+  catch (e){ throw new Error(netMsg(e)); }
+  const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Error del servidor');
+  const fin = await waitJob(j.id, p);
+  p(99, 'Descargando resultado…');
+  const rb = await fetch(API + '/api/file/' + j.id);
+  return { blob: await rb.blob(), name: fin.name };
+}
+
+// ---------- Pestaña: Descargar URL ----------
+const U = { url:'', info:null, infoErr:null, mode:'video', quality:'best', vfmt:'mp4', afmt:'mp3', job:null, busy:false, hist:[] };
+const fmtDur = s => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); };
+
+function renderSrvBox(){
+  const b = $('#srvbox'); if (!b) return;
+  if (srv){
+    b.innerHTML = '<div class="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs">' +
+      '<span class="h-2 w-2 rounded-full bg-emerald-400"></span> Servidor conectado · yt-dlp ' +
+      (srv.ytdlp ? esc(srv.ytdlp) : '<b class="text-rose-300">no instalado</b>') + ' · ffmpeg ' + (srv.ffmpeg ? '✓' : '<b class="text-rose-300">no instalado</b>') + '</div>';
+  } else {
+    b.innerHTML = '<div class="rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm"><div class="font-semibold">Servidor local no encontrado</div>' +
+      '<ol class="mt-2 list-decimal space-y-1 pl-5 text-xs text-white/75">' +
+      '<li>Instala Python 3, ffmpeg y yt-dlp (<code class="font-mono2">pip install -U yt-dlp</code>).</li>' +
+      '<li>Guarda <code class="font-mono2">servidor.py</code> junto a <code class="font-mono2">index.html</code>.</li>' +
+      '<li>Ejecuta <code class="font-mono2">python servidor.py</code> y abre <code class="font-mono2">http://localhost:8765</code>.</li></ol>' +
+      '<button class="btn-ghost mt-3" data-srv="retry">Reintentar conexión</button></div>';
+  }
+}
+
+function renderUrlOpts(){
+  const b = $('#urlopts'); if (!b) return;
+  const Q = [['best','Mejor disponible'],['2160','2160p (4K)'],['1440','1440p'],['1080','1080p'],['720','720p'],['480','480p'],['360','360p']];
+  const mk = (key, label, opts) => '<div class="min-w-[9rem]"><div class="lbl">' + label + '</div><select data-u="' + key + '" class="sel w-full">' +
+    opts.map(([v, l]) => '<option value="' + v + '"' + (String(U[key]) === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></div>';
+  b.innerHTML = mk('mode', 'Tipo', [['video','Vídeo'],['audio','Solo audio']]) +
+    (U.mode === 'video' ? mk('quality', 'Calidad', Q) + mk('vfmt', 'Formato', [['mp4','MP4'],['webm','WebM']])
+                        : mk('afmt', 'Formato', [['mp3','MP3'],['m4a','M4A'],['wav','WAV'],['opus','Opus']]));
+}
+
+function renderUrlInfo(){
+  const b = $('#urlinfo'); if (!b) return;
+  if (U.infoErr){ b.innerHTML = '<p class="font-mono2 rounded-xl bg-rose-500/10 p-3 text-xs text-rose-300">' + esc(U.infoErr) + '</p>'; return; }
+  const i = U.info; if (!i){ b.innerHTML = ''; return; }
+  const meta = [i.uploader, i.duration ? fmtDur(i.duration) : '', (i.heights && i.heights.length) ? 'hasta ' + i.heights[0] + 'p' : ''].filter(Boolean).map(esc).join(' · ');
+  b.innerHTML = '<div class="pop flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">' +
+    (i.thumbnail ? '<img src="' + esc(i.thumbnail) + '" referrerpolicy="no-referrer" alt="" class="h-20 w-36 shrink-0 rounded-xl object-cover">' : '') +
+    '<div class="min-w-0"><div class="line-clamp-2 font-semibold">' + esc(i.title || 'Sin título') + '</div><div class="font-mono2 mt-1 text-xs text-white/55">' + meta + '</div></div></div>';
+}
+
+function renderUrlProg(){
+  const b = $('#urlprog'); if (!b) return;
+  const j = U.job; if (!j){ b.innerHTML = ''; return; }
+  if (j.status === 'error') b.innerHTML = '<p class="font-mono2 rounded-xl bg-rose-500/10 p-3 text-xs text-rose-300">' + esc(j.error) + '</p>';
+  else if (j.status === 'done') b.innerHTML = '<p class="text-sm text-emerald-300">✓ Listo: ' + esc(j.name) + '</p>';
+  else b.innerHTML = '<div class="flex justify-between text-xs"><span class="t-a">' + esc(j.message || '') + '</span><span class="font-mono2 text-white/50">' + (j.percent || 0) + '%</span></div><div class="bar mt-2"><i style="width:' + (j.percent || 0) + '%"></i></div>';
+  const dlb = $('#urldl'); if (dlb){ dlb.disabled = U.busy; dlb.textContent = U.busy ? 'Descargando…' : '⬇ Descargar'; }
+}
+
+function renderUrlHist(){
+  const b = $('#urlhist'); if (!b) return;
+  b.innerHTML = U.hist.map((h, i) => '<div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2">' +
+    '<div class="min-w-0 flex-1 truncate text-sm">' + esc(h.name) + '</div>' +
+    '<button class="btn btn-sm" data-save="' + i + '">⬇ Guardar</button></div>').join('');
+}
+
+function saveServerFile(id, name){
+  const a = document.createElement('a'); a.href = API + '/api/file/' + id; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+async function analyzeUrl(){
+  const url = U.url.trim();
+  if (!/^https?:\/\//i.test(url)){ toast('Pega una URL que empiece por http o https.'); return; }
+  if (!(await checkServer())){ renderSrvBox(); toast('Servidor local no encontrado.'); return; }
+  renderSrvBox();
+  const btn = $('#urlgo'); if (btn){ btn.disabled = true; btn.textContent = 'Analizando…'; }
+  U.infoErr = null;
+  try {
+    const r = await fetch(API + '/api/info', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ url }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error || 'No se pudo analizar la URL');
+    U.info = j;
+  } catch (e){ U.info = null; U.infoErr = netMsg(e); }
+  const b2 = $('#urlgo'); if (b2){ b2.disabled = false; b2.textContent = 'Analizar'; }
+  renderUrlInfo();
+}
+
+async function startUrlDownload(){
+  if (U.busy) return;
+  const url = U.url.trim();
+  if (!/^https?:\/\//i.test(url)){ toast('Pega una URL que empiece por http o https.'); return; }
+  if (!(await checkServer())){ renderSrvBox(); toast('Servidor local no encontrado.'); return; }
+  renderSrvBox();
+  U.busy = true; U.job = { status:'running', percent:0, message:'Enviando…' }; renderUrlProg();
+  try {
+    const r = await fetch(API + '/api/download', { method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ url, mode: U.mode, quality: U.quality, format: U.mode === 'video' ? U.vfmt : U.afmt }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Error del servidor');
+    const fin = await waitJob(j.id, (pc, m) => { U.job = { status:'running', percent:pc, message:m }; renderUrlProg(); });
+    U.job = { status:'done', name: fin.name };
+    U.hist.unshift({ id: j.id, name: fin.name });
+    saveServerFile(j.id, fin.name);
+  } catch (e){ U.job = { status:'error', error: netMsg(e) }; }
+  U.busy = false; renderUrlProg(); renderUrlHist();
+}
+
+function renderUrlPanel(){
+  $('#panel').innerHTML =
+    '<div><h2 class="font-display text-xl font-bold">🔗 Descargar desde URL</h2>' +
+    '<p class="mt-1 text-sm text-white/60">Descarga vídeo o audio con yt-dlp a través de tu servidor local.</p></div>' +
+    '<div id="srvbox" class="mt-4"></div>' +
+    '<div class="mt-4 flex flex-wrap gap-2"><input id="urlin" type="text" class="sel min-w-0 flex-1" placeholder="https://…" value="' + esc(U.url) + '">' +
+    '<button id="urlgo" class="btn-ghost">Analizar</button></div>' +
+    '<div id="urlinfo" class="mt-4"></div>' +
+    '<div id="urlopts" class="mt-4 flex flex-wrap gap-4"></div>' +
+    '<div class="mt-5 flex flex-wrap items-center justify-between gap-3"><p class="max-w-sm text-xs text-white/45">Descarga solo contenido tuyo, de licencia libre o con permiso: respeta las condiciones de cada sitio.</p>' +
+    '<button id="urldl" class="btn">⬇ Descargar</button></div>' +
+    '<div id="urlprog" class="mt-4"></div><div id="urlhist" class="mt-4 space-y-2"></div>';
+  renderSrvBox(); renderUrlOpts(); renderUrlInfo(); renderUrlProg(); renderUrlHist();
+  const inp = $('#urlin');
+  inp.addEventListener('input', () => { U.url = inp.value; });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') analyzeUrl(); });
+  $('#urlgo').addEventListener('click', analyzeUrl);
+  $('#urldl').addEventListener('click', startUrlDownload);
+  $('#urlopts').addEventListener('change', e => {
+    const k = e.target.dataset.u; if (!k) return;
+    U[k] = e.target.value; if (k === 'mode') renderUrlOpts();
+  });
+  $('#srvbox').addEventListener('click', async e => {
+    if (e.target.closest('[data-srv=retry]')){ await checkServer(); renderSrvBox(); if (!srv) toast('Sigue sin responder.'); }
+  });
+  $('#urlhist').addEventListener('click', e => {
+    const b = e.target.closest('[data-save]'); if (!b) return;
+    const h = U.hist[+b.dataset.save]; if (h) saveServerFile(h.id, h.name);
+  });
+  if (srv === null) checkServer().then(renderSrvBox);
+}
+
+// ---------- Definición de herramientas ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeName = s => String(s || '').replace(/[\\/:*?"<>|]+/g, '').trim().slice(0, 100);
+const extOf = n => (n.split('.').pop() || '').toUpperCase();
+
+const TOOLS = {
+  epub: {
+    icon:'📚', label:'EPUB → PDF',
+    desc:'Convierte libros electrónicos a PDF con portada, capítulos e imágenes.',
+    drop:'Suelta tus libros .epub', accept:'.epub', test: f => /\.epub$/i.test(f.name),
+    opts:{ pageSize:'a4', fontSize:11 },
+    fields:[
+      { key:'pageSize', label:'Tamaño de página', type:'select', options:[['a4','A4'],['a5','A5 (compacto)'],['carta','Carta']] },
+      { key:'fontSize', label:'Tamaño de letra', type:'select', num:true, options:[[10,'Pequeña'],[11,'Normal'],[12.5,'Grande'],[14,'Muy grande']] },
+    ],
+    run: async (file, o, p) => {
+      const r = await convertEpubToPdf(file, o, p);
+      return { blob: r.blob, name: (safeName(r.title) || file.name.replace(/\.epub$/i, '') || 'libro') + '.pdf' };
+    },
+  },
+  webp: {
+    icon:'🖼️', label:'WebP → imagen / vídeo',
+    desc:'Pasa WebP a PNG o JPG, o convierte un WebP animado en vídeo (se graba en tiempo real).',
+    drop:'Suelta tus archivos .webp', accept:'.webp,image/webp', test: f => /\.webp$/i.test(f.name) || f.type === 'image/webp',
+    opts:{ target:'png', loops:1 },
+    fields:[
+      { key:'target', label:'Convertir a', type:'select', options:[['png','PNG (imagen)'],['jpg','JPG (imagen)'],['video','Vídeo (WebP animado)']] },
+      { key:'loops', label:'Repeticiones', type:'select', num:true, when:o => o.target === 'video', options:[[1,'1 vez'],[2,'2 veces'],[3,'3 veces'],[5,'5 veces']] },
+    ],
+    run: (file, o, p) => convertWebp(file, o, p),
+  },
+  webm: {
+    icon:'🎬', label:'WebM / vídeo',
+    desc:'Extrae el audio (MP3 o WAV), con editor para recortar, quitar partes y unir el resto, o regraba el vídeo como MP4/WebM.',
+    drop:'Suelta tus vídeos o audios', accept:'.webm,.mp4,.mov,.ogv,.ogg,.m4a,.mp3,.wav,video/*,audio/*',
+    test: f => /^(video|audio)\//.test(f.type) || /\.(webm|mp4|mov|ogv|ogg|m4a|mp3|wav|mkv)$/i.test(f.name),
+    opts:{ target:'mp3', kbps:192, fadeIn:false, fadeOut:false, merge:false, useServer:false },
+    fields:[
+      { key:'target', label:'Convertir a', type:'select', options:[['mp3','Audio MP3'],['wav','Audio WAV'],['video','Vídeo (MP4 o WebM)']] },
+      { key:'kbps', label:'Calidad MP3', type:'select', num:true, when:o => o.target === 'mp3', options:[[128,'128 kbps'],[192,'192 kbps'],[320,'320 kbps']] },
+      { key:'useServer', label:'Usar ffmpeg del servidor local (rápido, sin grabar en tiempo real)', type:'check', when:o => o.target === 'video' },
+      { key:'fadeIn', label:'Fundido de entrada', type:'check', when:o => o.target !== 'video' },
+      { key:'fadeOut', label:'Fundido de salida', type:'check', when:o => o.target !== 'video' },
+      { key:'merge', label:'Unir todos en un solo audio', type:'check', when:o => o.target !== 'video' },
+    ],
+    run: runWebm,
+  },
+  sticker: {
+    icon:'💬', label:'Stickers WhatsApp',
+    desc:'Convierte imágenes WebP, JPG o PNG en stickers de 512×512 px y menos de 100 KB.',
+    drop:'Suelta tus imágenes', accept:'.webp,.jpg,.jpeg,.png,image/*',
+    test: f => /^image\//.test(f.type) || /\.(webp|jpe?g|png)$/i.test(f.name),
+    opts:{ fit:'contain', shape:'none', outline:false, packName:'Mi pack', author:'' },
+    fields:[
+      { key:'fit', label:'Ajuste', type:'select', options:[['contain','Entera (con márgenes)'],['cover','Rellenar (recorta)']] },
+      { key:'shape', label:'Forma', type:'select', options:[['none','Sin recorte'],['round','Esquinas redondeadas'],['circle','Círculo']] },
+      { key:'outline', label:'Contorno blanco', type:'check' },
+      { key:'packName', label:'Nombre del pack', type:'text', ph:'Mi pack' },
+      { key:'author', label:'Autor', type:'text', ph:'Tu nombre' },
+    ],
+    run: runSticker,
+  },
+  url: { icon:'🔗', label:'Descargar URL', custom:true, desc:'' },
+};
+
+// ---------- Estado y UI ----------
+const ui = { tab:'epub' };
+const queues = { epub:[], webp:[], webm:[], sticker:[] };
+const busy = {};
+let uid = 0;
+
+function toast(msg){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+
+function dl(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function renderTabs(){
+  $('#tabs').innerHTML = Object.entries(TOOLS).map(([id, t]) =>
+    '<button class="tab' + (ui.tab === id ? ' on' : '') + '" data-tab="' + id + '"><span class="mr-1">' + t.icon + '</span>' + t.label + '</button>').join('');
+  $('#hicon').textContent = TOOLS[ui.tab].icon;
+}
+
+function setTab(id){
+  ui.tab = id;
+  document.body.dataset.theme = id;
+  renderTabs(); renderPanel();
+}
+
+function renderFields(){
+  const t = TOOLS[ui.tab];
+  $('#fields').innerHTML = t.fields.filter(f => !f.when || f.when(t.opts)).map(f => {
+    const v = t.opts[f.key];
+    if (f.type === 'select')
+      return '<div class="min-w-[9rem]"><div class="lbl">' + f.label + '</div><select data-k="' + f.key + '" class="sel w-full">' +
+        f.options.map(([val, lab]) => '<option value="' + val + '"' + (String(val) === String(v) ? ' selected' : '') + '>' + lab + '</option>').join('') + '</select></div>';
+    if (f.type === 'check')
+      return '<label class="flex cursor-pointer select-none items-center gap-2 self-end pb-2 text-sm"><input type="checkbox" data-k="' + f.key + '"' + (v ? ' checked' : '') + '> ' + f.label + '</label>';
+    return '<div class="min-w-[9rem] flex-1"><div class="lbl">' + f.label + '</div><input type="text" data-k="' + f.key + '" value="' + esc(v) + '" placeholder="' + (f.ph || '') + '" class="sel w-full"></div>';
+  }).join('');
+}
+
+function renderPanel(){
+  const t = TOOLS[ui.tab];
+  if (t.custom){ renderUrlPanel(); return; }
+  $('#panel').innerHTML =
+    '<div><h2 class="font-display text-xl font-bold">' + t.icon + ' ' + t.label + '</h2><p class="mt-1 text-sm text-white/60">' + t.desc + '</p></div>' +
+    '<div id="fields" class="mt-5 flex flex-wrap gap-4"></div>' +
+    '<label id="drop" class="dz mt-5" tabindex="0"><div class="dzi mb-2 inline-block text-4xl">' + t.icon + '</div>' +
+      '<div class="font-semibold">' + t.drop + '</div><div class="mt-1 text-xs text-white/50">o haz clic para elegirlos · puedes seleccionar varios</div>' +
+      '<input id="file" type="file" class="hidden" multiple accept="' + t.accept + '"></label>' +
+    '<div id="list" class="mt-5 space-y-3"></div><div id="actions" class="mt-5"></div>';
+
+  renderFields();
+  const box = $('#fields');
+  box.addEventListener('change', e => {
+    const k = e.target.dataset.k; if (!k) return;
+    const f = t.fields.find(x => x.key === k);
+    let v = f.type === 'check' ? e.target.checked : e.target.value;
+    if (f.num) v = parseFloat(v);
+    t.opts[k] = v;
+    if (f.type !== 'text') renderFields();
+  });
+  box.addEventListener('input', e => { if (e.target.type === 'text') t.opts[e.target.dataset.k] = e.target.value; });
+
+  const drop = $('#drop'), input = $('#file');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); addFiles(Array.from(e.dataTransfer.files || [])); });
+  input.addEventListener('change', () => { addFiles(Array.from(input.files || [])); input.value = ''; });
+
+  $('#list').addEventListener('click', e => {
+    const d = e.target.closest('[data-dl]'), r = e.target.closest('[data-rm]');
+    const q = queues[ui.tab];
+    const ed = e.target.closest('[data-edit]');
+    if (ed){ const it = q.find(i => i.id == ed.dataset.edit); if (it) openEditor(it); }
+    if (d){ const it = q.find(i => i.id == d.dataset.dl); if (it && it.result) dl(it.result.blob, it.result.name); }
+    if (r){ const idx = q.findIndex(i => i.id == r.dataset.rm); if (idx > -1){ const it = q[idx]; if (it.thumb) URL.revokeObjectURL(it.thumb); q.splice(idx, 1); updateList(); } }
+  });
+  $('#actions').addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    if (b.dataset.act === 'run') runAll(ui.tab);
+    if (b.dataset.act === 'zip') makeZip(false);
+    if (b.dataset.act === 'pack') makeZip(true);
+    if (b.dataset.act === 'clear'){
+      queues[ui.tab] = queues[ui.tab].filter(i => { const keep = i.status === 'pending' || i.status === 'working'; if (!keep && i.thumb) URL.revokeObjectURL(i.thumb); return keep; });
+      updateList();
+    }
+  });
+  updateList();
+}
+
+function cardHtml(it){
+  const stCls = { pending:'text-white/50', working:'t-a', done:'text-emerald-300', error:'text-rose-300' }[it.status];
+  const label = { pending:'En cola', working: it.message || 'Procesando…', done:'Listo', error:'Error' }[it.status];
+  const thumb = it.thumb
+    ? '<img src="' + it.thumb + '" alt="" class="checker h-14 w-14 shrink-0 rounded-xl border border-white/10 object-contain">'
+    : '<div class="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-white/10 text-2xl">' + TOOLS[it.tab].icon + '</div>';
+  let body = '';
+  if (it.status === 'pending' && it.tab === 'webm' && TOOLS.webm.opts.target !== 'video')
+    body = '<div class="mt-3 flex flex-wrap items-center gap-2"><button class="btn-ghost" style="padding:.4rem .8rem;font-size:.75rem" data-edit="' + it.id + '">✂ Editar / recortar</button>' +
+      (it.cuts && it.cuts.length ? '<span class="font-mono2 text-xs t-a">' + it.cuts.length + ' corte(s) · resultado ' + fmtT(it.keptDur) + '</span>' : '') + '</div>';
+  if (it.status === 'working') body = '<div class="bar mt-3"><i style="width:' + it.progress + '%"></i></div>';
+  if (it.status === 'error') body = '<p class="font-mono2 mt-3 text-xs text-rose-300">' + esc(it.error) + '</p>';
+  if (it.status === 'done' && it.merged) body = '<p class="mt-3 text-xs text-white/55">Incluido en el audio unido (descárgalo desde el primer archivo).</p>';
+  if (it.status === 'done' && it.result){
+    const kb = (it.result.blob.size / 1024).toFixed(it.result.blob.size > 1048576 ? 0 : 1);
+    body = '<div class="mt-3 flex flex-wrap items-center gap-2">' +
+      '<button class="btn btn-sm" data-dl="' + it.id + '">⬇ Descargar ' + extOf(it.result.name) + '</button>' +
+      '<span class="font-mono2 text-xs text-white/50">' + (it.result.blob.size > 1048576 ? (it.result.blob.size / 1048576).toFixed(1) + ' MB' : kb + ' KB') + '</span>' +
+      (it.result.warn ? '<span class="rounded-md bg-amber-400/20 px-2 py-0.5 text-xs text-amber-200">supera 100 KB: puede que WhatsApp lo rechace</span>' : '') + '</div>';
+  }
+  return '<div class="pop rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10">' +
+    '<div class="flex items-center gap-3">' + thumb +
+    '<div class="min-w-0 flex-1"><div class="truncate font-semibold">' + esc(it.file.name) + '</div>' +
+    '<div class="font-mono2 text-xs text-white/50">' + formatBytes(it.file.size) + '</div></div>' +
+    '<div class="font-mono2 max-w-[11rem] truncate text-right text-xs ' + stCls + '">' + esc(label) + '</div>' +
+    (it.status !== 'working' ? '<button data-rm="' + it.id + '" class="ml-1 rounded-lg px-2 py-1 text-white/40 transition hover:bg-white/10 hover:text-white" title="Quitar">✕</button>' : '') +
+    '</div>' + body + '</div>';
+}
+
+function updateList(){
+  const list = $('#list'), actions = $('#actions');
+  if (!list) return;
+  const q = queues[ui.tab];
+  list.innerHTML = q.map(cardHtml).join('');
+  if (!q.length){ actions.innerHTML = ''; return; }
+  const pending = q.some(i => i.status === 'pending');
+  const running = !!busy[ui.tab];
+  const done = q.filter(i => i.status === 'done' && i.result);
+  const finished = q.some(i => i.status === 'done' || i.status === 'error');
+  actions.innerHTML = '<div class="flex flex-wrap items-center justify-between gap-3">' +
+    '<p class="text-xs text-white/45">🔒 Procesamiento 100% local</p><div class="flex flex-wrap gap-2">' +
+    (finished ? '<button class="btn-ghost" data-act="clear">Limpiar</button>' : '') +
+    (ui.tab === 'sticker' && done.length ? '<button class="btn-ghost" data-act="pack">📦 Pack (.zip)</button>'
+      : (done.length > 1 ? '<button class="btn-ghost" data-act="zip">📦 Todo en .zip</button>' : '')) +
+    '<button class="btn" data-act="run"' + (!pending || running ? ' disabled' : '') + '>' + (running ? 'Convirtiendo…' : 'Convertir todo') + '</button>' +
+    '</div></div>';
+}
+
+function addFiles(files){
+  const t = TOOLS[ui.tab];
+  const ok = files.filter(t.test);
+  if (!ok.length && files.length) toast('Ese tipo de archivo no sirve para «' + t.label + '».');
+  ok.forEach(file => queues[ui.tab].push({ id: ++uid, tab: ui.tab, file, status:'pending', progress:0, message:'', result:null, error:'', thumb:null }));
+  updateList();
+}
+
+async function runAll(tab){
+  if (busy[tab]) return;
+  busy[tab] = true; document.body.classList.add('working'); updateList();
+  const t = TOOLS[tab];
+  const handled = await runMerge(tab);
+  for (const it of (handled ? [] : queues[tab])){
+    if (it.status !== 'pending') continue;
+    it.status = 'working'; it.progress = 0; it.message = 'Iniciando…';
+    if (ui.tab === tab) updateList();
+    try {
+      const r = await t.run(it.file, Object.assign({}, t.opts), (pct, msg) => { it.progress = pct; it.message = msg; if (ui.tab === tab) updateList(); }, it);
+      it.result = r; it.status = 'done';
+      if (r.blob.type.startsWith('image/')) it.thumb = URL.createObjectURL(r.blob);
+    } catch (e){
+      console.error(e);
+      it.status = 'error'; it.error = (e && e.message) || 'No se pudo convertir este archivo.';
+    }
+    if (ui.tab === tab) updateList();
+  }
+  busy[tab] = false;
+  if (!Object.values(busy).some(Boolean)) document.body.classList.remove('working');
+  if (ui.tab === tab) updateList();
+}
+
+async function makeZip(asPack){
+  const t = TOOLS[ui.tab];
+  const done = queues[ui.tab].filter(i => i.status === 'done' && i.result);
+  if (!done.length) return;
+  const zip = new JSZip();
+  if (asPack){
+    done.slice(0, 30).forEach((it, i) => zip.file((i + 1) + '.webp', it.result.blob));
+    const bmp = await createImageBitmap(done[0].result.blob);
+    const c = document.createElement('canvas'); c.width = c.height = 96;
+    const sc = Math.min(96 / bmp.width, 96 / bmp.height);
+    c.getContext('2d').drawImage(bmp, (96 - bmp.width*sc)/2, (96 - bmp.height*sc)/2, bmp.width*sc, bmp.height*sc);
+    zip.file('tray.png', await new Promise(r => c.toBlob(r, 'image/png')));
+    zip.file('title.txt', t.opts.packName || 'Mi pack');
+    zip.file('author.txt', t.opts.author || '');
+    if (done.length > 30) toast('Un pack admite máximo 30 stickers: he incluido los 30 primeros.');
+  } else {
+    const used = {};
+    done.forEach(it => {
+      let n = it.result.name;
+      if (used[n]){ const dot = n.lastIndexOf('.'); n = n.slice(0, dot) + '-' + used[n] + n.slice(dot); }
+      used[it.result.name] = (used[it.result.name] || 0) + 1;
+      zip.file(n, it.result.blob);
+    });
+  }
+  const blob = await zip.generateAsync({ type:'blob' });
+  dl(blob, (asPack ? (safeName(t.opts.packName) || 'pack-stickers') : 'conversiones') + '.zip');
+}
+
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
+setTab('epub');
+checkServer();
+})();
+</script>
+</body>
+</html>
