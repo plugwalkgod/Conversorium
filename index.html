@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Conversorium</title>
+<title>Conversorium · Conversor de archivos</title>
+<meta name="description" content="Convierte EPUB a PDF, WebP, audio, vídeo y stickers de WhatsApp gratis y sin subir tus archivos.">
+<meta name="theme-color" content="#0d0b14">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2064%2064%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22lg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%238b7bff%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff6b9a%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22url%28%23lg%29%22/%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M19%2027a14%2014%200%200%201%2024.5-6.5%22/%3E%3Cpath%20d%3D%22M44.5%2013v8h-8%22/%3E%3Cpath%20d%3D%22M45%2037a14%2014%200%200%201-24.5%206.5%22/%3E%3Cpath%20d%3D%22M19.5%2051v-8h8%22/%3E%3C/g%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -29,12 +32,17 @@ body[data-theme=sticker]{ --a:#4ade80; --a2:#22c55e; --bg:#04150b; }
 body[data-theme=url]    { --a:#fb7185; --a2:#f43f5e; --bg:#1a0509; }
 
 .t-a{ color:var(--a); }
+.brand{ color:#fff; }
+.brand-ium{ background-image:linear-gradient(90deg,#8b7bff,#ff6b9a); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.ico{ width:1em; height:1em; display:inline-block; }
+.dzi .ico{ width:2.5rem; height:2.5rem; color:var(--a); }
+
 .grad-text{ background-image:linear-gradient(90deg,var(--a),var(--a2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .font-display{ font-family:'Space Grotesk','Inter',sans-serif; }
 .font-mono2{ font-family:'IBM Plex Mono',monospace; }
 
 /* fondo */
-.blob{ position:absolute; border-radius:9999px; filter:blur(90px); opacity:.34; }
+.blob{ position:absolute; border-radius:9999px; filter:blur(110px); opacity:.18; }
 .b1{ width:48vmax; height:48vmax; top:-20vmax; left:-14vmax; background:var(--a);  animation:f1 19s ease-in-out infinite; }
 .b2{ width:42vmax; height:42vmax; bottom:-18vmax; right:-12vmax; background:var(--a2); animation:f2 23s ease-in-out infinite; }
 .b3{ width:26vmax; height:26vmax; top:35%; left:55%; background:var(--a); opacity:.14; animation:f1 27s ease-in-out infinite reverse; }
@@ -97,10 +105,10 @@ input[type=checkbox]{ accent-color:var(--a); width:1rem; height:1rem; }
 
 <main class="relative z-10 mx-auto w-full max-w-3xl px-4 py-10 sm:py-14">
   <header class="flex items-center gap-4">
-    <div class="logo grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-3xl shadow-2xl" style="background-image:linear-gradient(135deg,var(--a),var(--a2))"><span id="hicon" style="display:inline-block">📚</span></div>
+    <svg viewBox="0 0 64 64" class="h-12 w-12 shrink-0 drop-shadow-xl" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7bff"/><stop offset="1" stop-color="#ff6b9a"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lg)"/><g fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 27a14 14 0 0 1 24.5-6.5"/><path d="M44.5 13v8h-8"/><path d="M45 37a14 14 0 0 1-24.5 6.5"/><path d="M19.5 51v-8h8"/></g></svg>
     <div>
-      <h1 class="font-display text-3xl font-bold leading-tight sm:text-4xl"><span class="grad-text">Conversorium</span></h1>
-      <p class="mt-1 text-sm text-white/60">Todo ocurre en tu navegador. Nada se sube a ningún servidor.</p>
+      <h1 class="brand font-display text-3xl font-bold leading-none tracking-tight sm:text-[2.1rem]">Conversor<span class="brand-ium">ium</span></h1>
+      <p class="mt-1.5 text-sm text-white/55">Convierte libros, imágenes, audio y vídeo. Tus archivos no salen de tu dispositivo.</p>
     </div>
   </header>
 
@@ -108,7 +116,7 @@ input[type=checkbox]{ accent-color:var(--a); width:1rem; height:1rem; }
 
   <section id="panel" class="mt-5 rounded-3xl border border-white/10 bg-black/35 p-5 shadow-2xl backdrop-blur-xl sm:p-7"></section>
 
-  <footer class="mt-8 text-center text-xs text-white/35">Hecho con Tailwind · JSZip · jsPDF · lamejs · ffmpeg.wasm · yt-dlp · ffmpeg</footer>
+  <footer class="mt-10 flex flex-col items-center gap-1 text-center text-xs text-white/35"><span>© 2026 Conversorium · Gratis y privado</span><span>Funciona con JSZip, jsPDF, lamejs, ffmpeg y yt-dlp</span></footer>
 </main>
 
 <script>
@@ -1109,7 +1117,7 @@ async function startUrlDownload(){
 
 function renderUrlPanel(){
   $('#panel').innerHTML =
-    '<div><h2 class="font-display text-xl font-bold">🔗 Descargar desde URL</h2>' +
+    '<div><h2 class="font-display flex items-center gap-2 text-xl font-bold">🔗 Descargar desde URL</h2>' +
     '<p class="mt-1 text-sm text-white/60">Descarga vídeo o audio con yt-dlp a través de tu servidor local.</p></div>' +
     '<div id="srvbox" class="mt-4"></div>' +
     '<div class="mt-4 flex flex-wrap gap-2"><input id="urlin" type="text" class="sel min-w-0 flex-1" placeholder="https://…" value="' + esc(U.url) + '">' +
@@ -1147,7 +1155,7 @@ const extOf = n => (n.split('.').pop() || '').toUpperCase();
 
 const TOOLS = {
   epub: {
-    icon:'📚', label:'EPUB → PDF',
+    icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h7M8 11h5"/></svg>', label:'EPUB → PDF',
     desc:'Convierte libros electrónicos a PDF con portada, capítulos e imágenes.',
     drop:'Suelta tus libros .epub', accept:'.epub', test: f => /\.epub$/i.test(f.name),
     opts:{ pageSize:'a4', fontSize:11 },
@@ -1161,7 +1169,7 @@ const TOOLS = {
     },
   },
   webp: {
-    icon:'🖼️', label:'WebP → imagen / vídeo',
+    icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9 9"/></svg>', label:'WebP → imagen / vídeo',
     desc:'Pasa WebP a PNG o JPG, o convierte un WebP animado en vídeo (se graba en tiempo real).',
     drop:'Suelta tus archivos .webp', accept:'.webp,image/webp', test: f => /\.webp$/i.test(f.name) || f.type === 'image/webp',
     opts:{ target:'png', loops:1 },
@@ -1172,7 +1180,7 @@ const TOOLS = {
     run: (file, o, p) => convertWebp(file, o, p),
   },
   webm: {
-    icon:'🎬', label:'WebM / vídeo',
+    icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="14" height="12" rx="2"/><path d="m16.5 10.5 5-3v9l-5-3"/></svg>', label:'WebM / vídeo',
     desc:'Extrae el audio (MP3 o WAV), con editor para recortar, quitar partes y unir el resto, o convierte el vídeo a MP4 con ffmpeg, sin salir del navegador.',
     drop:'Suelta tus vídeos o audios', accept:'.webm,.mp4,.mov,.ogv,.ogg,.m4a,.mp3,.wav,video/*,audio/*',
     test: f => /^(video|audio)\//.test(f.type) || /\.(webm|mp4|mov|ogv|ogg|m4a|mp3|wav|mkv)$/i.test(f.name),
@@ -1188,7 +1196,7 @@ const TOOLS = {
     run: runWebm,
   },
   sticker: {
-    icon:'💬', label:'Stickers WhatsApp',
+    icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12z"/><path d="M9 10h.01M15 10h.01M9.5 14a3.5 3.5 0 0 0 5 0"/></svg>', label:'Stickers WhatsApp',
     desc:'Convierte imágenes WebP, JPG o PNG en stickers de 512×512 px y menos de 100 KB.',
     drop:'Suelta tus imágenes', accept:'.webp,.jpg,.jpeg,.png,image/*',
     test: f => /^image\//.test(f.type) || /\.(webp|jpe?g|png)$/i.test(f.name),
@@ -1202,7 +1210,7 @@ const TOOLS = {
     ],
     run: runSticker,
   },
-  url: { icon:'🔗', label:'Descargar URL', custom:true, desc:'' },
+  url: { icon:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>', label:'Descargar URL', custom:true, desc:'' },
 };
 
 // ---------- Estado y UI ----------
@@ -1225,8 +1233,7 @@ function dl(blob, name){
 
 function renderTabs(){
   $('#tabs').innerHTML = Object.entries(TOOLS).map(([id, t]) =>
-    '<button class="tab' + (ui.tab === id ? ' on' : '') + '" data-tab="' + id + '"><span class="mr-1">' + t.icon + '</span>' + t.label + '</button>').join('');
-  $('#hicon').textContent = TOOLS[ui.tab].icon;
+    '<button class="tab' + (ui.tab === id ? ' on' : '') + '" data-tab="' + id + '"><span class="mr-1.5 inline-block align-[-2px]">' + t.icon + '</span>' + t.label + '</button>').join('');
 }
 
 function setTab(id){
@@ -1252,7 +1259,7 @@ function renderPanel(){
   const t = TOOLS[ui.tab];
   if (t.custom){ renderUrlPanel(); return; }
   $('#panel').innerHTML =
-    '<div><h2 class="font-display text-xl font-bold">' + t.icon + ' ' + t.label + '</h2><p class="mt-1 text-sm text-white/60">' + t.desc + '</p></div>' +
+    '<div><h2 class="font-display text-xl font-bold">' + t.icon + ' <span>' + t.label + '</span></h2><p class="mt-1 text-sm text-white/60">' + t.desc + '</p></div>' +
     '<div id="fields" class="mt-5 flex flex-wrap gap-4"></div>' +
     '<label id="drop" class="dz mt-5" tabindex="0"><div class="dzi mb-2 inline-block text-4xl">' + t.icon + '</div>' +
       '<div class="font-semibold">' + t.drop + '</div><div class="mt-1 text-xs text-white/50">o haz clic para elegirlos · puedes seleccionar varios</div>' +
