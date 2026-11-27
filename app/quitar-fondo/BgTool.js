@@ -111,8 +111,9 @@ export default function BgTool() {
 
   useEffect(() => {
     if (state !== 'ready') return;
-    cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(draw);
+    clearTimeout(raf.current);
+    raf.current = setTimeout(draw, 16);
+    return () => clearTimeout(raf.current);
   }, [state, draw]);
 
   function onMove(e) {
