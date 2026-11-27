@@ -37,6 +37,9 @@ TMP = tempfile.mkdtemp(prefix="conversorium_")
 atexit.register(lambda: shutil.rmtree(TMP, ignore_errors=True))
 
 ALLOWED_ORIGINS = {"http://localhost:%d" % PORT, "http://127.0.0.1:%d" % PORT, "null"}
+# Webs publicadas que pueden usar este servidor (añade otras con CONVERSORIUM_ORIGINS=https://a.com,https://b.com)
+ALLOWED_ORIGINS |= {"https://conversorium.vercel.app"}
+ALLOWED_ORIGINS |= {o.strip().rstrip("/") for o in os.environ.get("CONVERSORIUM_ORIGINS", "").split(",") if o.strip()}
 JOBS = {}
 JOBS_LOCK = threading.Lock()
 FFMPEG = shutil.which("ffmpeg")
@@ -271,6 +274,8 @@ class Handler(BaseHTTPRequestHandler):
         self.cors()
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        if self.headers.get("Access-Control-Request-Private-Network") == "true":
+            self.send_header("Access-Control-Allow-Private-Network", "true")
         self.send_header("Content-Length", "0")
         self.end_headers()
 

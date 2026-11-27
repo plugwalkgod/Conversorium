@@ -923,7 +923,6 @@ let srv = null;
 const netMsg = e => (e instanceof TypeError) ? 'No se pudo contactar con el servidor local. ¿Está ejecutándose servidor.py?' : ((e && e.message) || 'Error desconocido');
 
 async function checkServer(){
-  if (!LOCAL) return (srv = null);
   try {
     const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 1500);
     const r = await fetch(API + '/api/status', { signal: ctl.signal });
@@ -1026,7 +1025,8 @@ function renderSrvBox(){
       '<ol class="mt-2 list-decimal space-y-1 pl-5 text-xs text-white/75">' +
       '<li>Instala Python 3, ffmpeg y yt-dlp (<code class="font-mono2">pip install -U yt-dlp</code>).</li>' +
       '<li>Guarda <code class="font-mono2">servidor.py</code> junto a <code class="font-mono2">index.html</code>.</li>' +
-      '<li>Ejecuta <code class="font-mono2">python servidor.py</code> y abre <code class="font-mono2">http://localhost:8765</code>.</li></ol>' +
+      '<li>Ejecuta <code class="font-mono2">python servidor.py</code>' + (LOCAL ? ' y abre <code class="font-mono2">http://localhost:8765</code>' : ' y vuelve a esta página') + '.</li></ol>' +
+      (LOCAL ? '' : '<p class="mt-2 text-xs text-white/60">Esta función usa un servidor en tu propio ordenador. Si el navegador pregunta si permites acceder a la red local, acepta.</p>') +
       '<button class="btn-ghost mt-3" data-srv="retry">Reintentar conexión</button></div>';
   }
 }
@@ -1224,7 +1224,7 @@ function dl(blob, name){
 }
 
 function renderTabs(){
-  $('#tabs').innerHTML = Object.entries(TOOLS).filter(([id]) => LOCAL || id !== 'url').map(([id, t]) =>
+  $('#tabs').innerHTML = Object.entries(TOOLS).map(([id, t]) =>
     '<button class="tab' + (ui.tab === id ? ' on' : '') + '" data-tab="' + id + '"><span class="mr-1">' + t.icon + '</span>' + t.label + '</button>').join('');
   $('#hicon').textContent = TOOLS[ui.tab].icon;
 }
@@ -1408,7 +1408,7 @@ async function makeZip(asPack){
 
 $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
 setTab('epub');
-checkServer();
+if (LOCAL) checkServer();
 })();
 </script>
 </body>
