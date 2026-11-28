@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ToolIcon } from '../../components/Icon';
 
-const TOOL_IDS = ['epub', 'webp', 'webm', 'bg', 'sticker', 'url'];
+const TOOL_IDS = ['epub', 'word', 'webp', 'webm', 'bg', 'sticker', 'url'];
 const input = 'mt-1.5 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition focus:border-violet-400';
 const label = 'block text-xs font-semibold uppercase tracking-wider text-violet-300';
 
